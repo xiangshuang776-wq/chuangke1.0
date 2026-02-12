@@ -28,7 +28,6 @@
             const [showModal, setShowModal] = useState(false);
             const [modalType, setModalType] = useState("login"); 
             
-            // --- 註冊表單數據 ---
             const [regForm, setRegForm] = useState({ name: "", phone: "", email: "", pass: "" });
             const [inputVal, setInputVal] = useState("");
             const [inputPass, setInputPass] = useState("");
@@ -36,7 +35,12 @@
 
             const timerRef = useRef(null);
             const handleLogoTouchStart = () => {
-                timerRef.current = setTimeout(() => { setModalType("adminLogin"); setShowModal(true); }, 2000);
+                timerRef.current = setTimeout(() => { 
+                    setModalType("adminLogin"); 
+                    setInputVal(""); // 清空輸入
+                    setInputPass(""); // 清空輸入
+                    setShowModal(true); 
+                }, 2000);
             };
             const handleLogoTouchEnd = () => clearTimeout(timerRef.current);
 
@@ -44,7 +48,7 @@
                 zh_tw: {
                     nav: ["任務", "等級", "加入"], hero: ["TikTok", "創客達人招募"],
                     subtitle: "TikTok 創客加速計畫：只要發佈一條視頻就有 20 台幣！基礎/中/高播放獎金疊加。",
-                    calcTitle: "預估月收入收益模擬", calcLabel: "每日預計發佈視頻數", normal: "見習收益", pro: "紅創客收益",
+                    calcTitle: "預估月收入收益模擬", normal: "見習收益", pro: "紅創客收益",
                     rankTitle: "創客等級與特權體系",
                     lv1: ["見習創客", "無門檻", "20 TWD/條", "5% 提成", "基礎結算"], 
                     lv2: ["紅創客", "999 TWD 會費", "30 TWD/條", "10% 提成", "專屬素材"], 
@@ -52,7 +56,7 @@
                     statusPending: "⏳ 賬號審核中", statusApproved: "✅ 審核已通過", statusRejected: "❌ 駁回：請聯繫客服",
                     withdrawBtn: "餘額提現", submitTask: "提交視頻連結", submitBtn: "提交審核", closeBtn: "關閉",
                     bindTikTok: "綁定 TikTok 帳號",
-                    modals: { login: { title: "創客登錄", btn: "立即登錄" }, register: { title: "新創客註冊", btn: "完成註冊" }, adminLogin: { title: "管理員", btn: "進入" }, service: { title: "官方客服", desc: "掃碼聯繫客服" } }
+                    modals: { login: { title: "創客登錄", btn: "立即登錄" }, register: { title: "新創客註冊", btn: "完成註冊" }, adminLogin: { title: "管理員進入", btn: "解鎖後台" }, service: { title: "官方客服", desc: "掃碼聯繫客服" } }
                 },
                 zh_cn: {
                     nav: ["任务", "等级", "加入"], hero: ["TikTok", "创客达人招募"],
@@ -65,7 +69,7 @@
                     statusPending: "⏳ 账号审核中", statusApproved: "✅ 审核已通过", statusRejected: "❌ 驳回：请联系客服",
                     withdrawBtn: "余额提现", submitTask: "提交视频链接", submitBtn: "提交审核", closeBtn: "关闭",
                     bindTikTok: "绑定 TikTok 账号",
-                    modals: { login: { title: "创客登录", btn: "立即登录" }, register: { title: "新创客注册", btn: "完成注册" }, adminLogin: { title: "管理员", btn: "进入" }, service: { title: "官方客服", desc: "扫码联系客服" } }
+                    modals: { login: { title: "创客登录", btn: "立即登录" }, register: { title: "新创客注册", btn: "完成注册" }, adminLogin: { title: "管理员进入", btn: "解锁后台" }, service: { title: "官方客服", desc: "扫码联系客服" } }
                 },
                 en: {
                     nav: ["Tasks", "Rank", "Join"], hero: ["TikTok", "Recruitment"],
@@ -78,7 +82,7 @@
                     statusPending: "Reviewing", statusApproved: "Approved", statusRejected: "Rejected",
                     withdrawBtn: "Withdraw", submitTask: "Submit Video Link", submitBtn: "Submit", closeBtn: "Close",
                     bindTikTok: "Bind TikTok Account",
-                    modals: { login: { title: "Login", btn: "Login" }, register: { title: "Register", btn: "Register" }, adminLogin: { title: "Admin", btn: "Enter" }, service: { title: "Support", desc: "Scan to Support" } }
+                    modals: { login: { title: "Login", btn: "Login" }, register: { title: "Register", btn: "Register" }, adminLogin: { title: "Admin Portal", btn: "Unlock" }, service: { title: "Support", desc: "Scan to Support" } }
                 }
             };
             const t = content[lang] || content["zh_tw"];
@@ -94,11 +98,16 @@
                         setCurrentUser({ email: inputVal, balance: 120, status: "pending", tiktok: "" });
                         setView("userDash"); setShowModal(false);
                     } else if (modalType === "adminLogin") {
-                        if (inputVal === "admin888") { setView("admin"); setShowModal(false); }
-                        else { alert("密碼錯誤"); }
+                        // --- 精準修正：只要密碼對了就放行 ---
+                        if (inputPass === "admin888") { 
+                            setView("admin"); 
+                            setShowModal(false); 
+                        } else { 
+                            alert("後台管理密碼錯誤！"); 
+                        }
                     }
                     setStatus("idle"); setInputVal(""); setInputPass("");
-                }, 800);
+                }, 500);
             };
 
             const styles = {
@@ -123,7 +132,7 @@
                         .square-card { aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.3s; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); flex: 1; border-radius: 14px; cursor: pointer; }
                         .join-btn-bottom { width: 100%; max-width: 500px; background: #111; border: 1.5px solid #00f2ea; color: #00f2ea; padding: 16px; border-radius: 50px; font-weight: 900; font-size: 15px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 242, 234, 0.2); }
                         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-                        .modal-content { background: #111; border: 1px solid #222; padding: 25px; border-radius: 24px; width: 300px; height: auto; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; }
+                        .modal-content { background: #111; border: 1px solid #222; padding: 25px; border-radius: 24px; width: 300px; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; }
                         .input-box { width: 100%; background: #000; border: 1px solid #333; padding: 12px; border-radius: 10px; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline:none; font-size: 14px; }
                         .win-marquee { position: absolute; top: -35px; left: 0; width: 100%; font-size: 12px; color: #00f2ea; white-space: nowrap; overflow: hidden; }
                         .win-marquee span { display: inline-block; animation: marquee 15s linear infinite; }
@@ -162,7 +171,7 @@
                                 <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.info}</div>
                                 <a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#fff', textDecoration:'underline'}}>{u.tiktok}</a><br/>
                                 <div style={{textAlign:'right', marginTop:'10px'}}>
-                                    <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>setPendingUsers(prev=>prev.filter(x=>x.id!==u.id))}>核准通過</button>
+                                    <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>{setCurrentUser(prev=>({...prev, status:'approved'})); alert("已核准");}}>核准通過</button>
                                 </div>
                             </div>
                         ))}</div></div>
@@ -178,8 +187,8 @@
                                     <input required className="input-box" placeholder="電話號碼" onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
                                 </>
                             )}
-                            <input required className="input-box" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder="Email" />
-                            <input required className="input-box" type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="密碼" />
+                            <input required className="input-box" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder={modalType==='adminLogin' ? "Admin Account" : "Email"} />
+                            <input required className="input-box" type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="密碼 (admin888)" />
                             <button className="input-box" style={{background:'#00f2ea', color:'#000', fontWeight:'bold', border:'none', cursor:'pointer'}}>{status==='processing'?'...':t.modals[modalType]?.btn}</button>
                             {modalType==='login' && <div onClick={()=>setModalType("register")} style={{fontSize:'12px', color:'#666', cursor:'pointer', marginTop:'10px'}}>沒有帳號？立即註冊</div>}
                         </form>)}<button onClick={()=>setShowModal(false)} style={{background:'none', border:'none', color:'#444', marginTop:'10px', cursor:'pointer'}}>{t.closeBtn}</button></div></div>
