@@ -20,15 +20,19 @@
             const [videoCount, setVideoCount] = useState(10); 
             const [lang, setLang] = useState("zh_tw");
             
+            // --- 用戶實時數據 ---
+            const [userEmail, setUserEmail] = useState("");
+            const [userTikTok, setUserTikTok] = useState("");
+            
             const [isLoggedIn, setIsLoggedIn] = useState(false); 
             const [accountStatus, setAccountStatus] = useState("unbound"); 
             const [userBalance, setUserBalance] = useState(0);
             const [isRedCreator, setIsRedCreator] = useState(false);
             const [qrCodeUrl, setQrCodeUrl] = useState("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAKERPRO_SERVICE");
 
+            // --- 後台模擬數據庫 (已打通) ---
             const [pendingUsers, setPendingUsers] = useState([
-                { id: 1, info: "test88@gmail.com", tiktok: "https://tiktok.com/@user1", time: "2026-02-12" },
-                { id: 2, info: "0912345678", tiktok: "https://tiktok.com/@tw_maker", time: "2026-02-12" }
+                { id: 999, info: "example@test.com", tiktok: "https://tiktok.com/@official", time: "2026-02-12" }
             ]);
 
             const [showModal, setShowModal] = useState(false);
@@ -42,22 +46,21 @@
             };
             const handleLogoTouchEnd = () => clearTimeout(timerRef.current);
 
-            // 完整翻译字典
             const content = {
                 zh_tw: {
                     nav: ["任務大廳", "收益等級", "加入創客"], hero: ["TikTok", "創客達人招募"],
                     subtitle: "TikTok 創客加速計畫：只要發佈一條視頻就有 20 台幣！基礎/中/高播放獎金疊加。",
                     calcTitle: "預估月收入收益模擬", calcLabel: "每日預計發佈視頻數", normal: "見習創客月收益", pro: "紅創客月收益",
                     statusPending: "審核中", upgradeBtnTxt: "立即升級", successTxt: "操作成功", closeBtn: "關閉",
-                    logic1: { t1: ["基礎發佈獎勵", "20", "只要發佈成功且有基礎播放即可獲得"], t2: ["中級流量獎", "40", "500-5000 播放量區間階梯獎金"], t3: ["爆款高播放獎", "100+", "5000+ 播放獎金及 10% 帶貨提成"] },
-                    logic2: { title: "創客等級與特權體系", lv1: ["見習創客", "無門檻", "20 TWD/條", "5% 提成", "基礎結算"], lv2: ["紅創客", "999 TWD 會費", "30 TWD/條", "10% 提成", "專屬素材"], lv3: ["導師級", "高額保證金", "300+ 獎金", "15% 提成", "管理津貼"] },
+                    logic1: { t1: ["基礎發佈獎勵", "20", ""], t2: ["中級流量獎", "40", ""], t3: ["爆款高播放獎", "100+", ""] },
+                    logic2: { title: "創客等級與特權體系", lv1: ["見習創客", "無門檻", "20/條", "5%", "基礎"], lv2: ["紅創客", "999 TWD", "30/條", "10%", "VIP"], lv3: ["導師級", "保證金", "300+", "15%", "管理"] },
                     modals: {
                         login: { title: "創客登錄", desc: "輸入手機/Email註冊", placeholder: "手機 / Email", btn: "下一步" },
-                        bind: { title: "綁定 TikTok", desc: "請綁定連結以開啟收益", placeholder: "TikTok Link", btn: "提交審核" },
-                        pending: { title: "審核中", desc: "您的賬號正在審核中，通過後即可領取獎金！" },
-                        task: { title: "提交任務", desc: "粘貼您的 TikTok 視頻連結", placeholder: "Video Link", btn: "提交領取" },
+                        bind: { title: "綁定 TikTok", desc: "請綁定主頁連結", placeholder: "TikTok Link", btn: "提交審核" },
+                        pending: { title: "審核中", desc: "賬號審核中，通過後開啟獎金" },
+                        task: { title: "提交任務", desc: "粘貼視頻連結", placeholder: "Link", btn: "領取獎金" },
                         adminLogin: { title: "管理員登錄", desc: "請輸入管理密碼", placeholder: "Password", btn: "進入" },
-                        service: { title: "官方在線客服", desc: "掃描二維碼聯繫客服" }
+                        service: { title: "在線客服", desc: "掃描二維碼聯繫客服" }
                     }
                 },
                 zh_cn: {
@@ -65,32 +68,18 @@
                     subtitle: "TikTok 创客加速计划：只要发布一条视频就有 20 台币！基础/中/高播放奖金叠加。",
                     calcTitle: "预估月收入收益模拟", calcLabel: "每日预计发布视频数", normal: "见习创客月收益", pro: "红创客月收益",
                     statusPending: "审核中", upgradeBtnTxt: "立即升级", successTxt: "操作成功", closeBtn: "关闭",
-                    logic1: { t1: ["基础发布奖励", "20", "发布成功即可获得"], t2: ["中级流量奖", "40", "500-5000 播放区间"], t3: ["爆款高播放奖", "100+", "5000+ 播放奖金"] },
-                    logic2: { title: "创客等级与特权体系", lv1: ["见习创客", "无门槛", "20 TWD/条", "5% 提成", "基础结算"], lv2: ["红创客", "999 TWD", "30 TWD/条", "10% 提成", "专属素材"], lv3: ["导师级", "保证金", "300+ 奖金", "15% 提成", "管理津贴"] },
-                    modals: {
-                        login: { title: "创客登录", desc: "输入手机/Email注册", placeholder: "手机 / Email", btn: "下一步" },
-                        bind: { title: "绑定 TikTok", desc: "绑定主页链接", placeholder: "TikTok Link", btn: "提交" },
-                        pending: { title: "审核中", desc: "账号审核中，通过后开启奖金" },
-                        task: { title: "提交任务", desc: "粘贴视频链接", placeholder: "Video Link", btn: "领奖" },
-                        adminLogin: { title: "管理登录", desc: "输入密码", placeholder: "Password", btn: "确定" },
-                        service: { title: "联系客服", desc: "扫码联系" }
-                    }
+                    logic1: { t1: ["基础发布奖励", "20", ""], t2: ["中级流量奖", "40", ""], t3: ["爆款高播放奖", "100+", ""] },
+                    logic2: { title: "创客等级与特权体系", lv1: ["见习创客", "", "20/条", "5%", ""], lv2: ["红创客", "", "30/条", "10%", ""], lv3: ["导师级", "", "300+", "15%", ""] },
+                    modals: { login: { title: "登录", desc: "手机/Email注册", placeholder: "Phone/Email", btn: "下一步" }, bind: { title: "绑定", desc: "绑定主页链接", placeholder: "Link", btn: "提交" }, pending: { title: "审核中", desc: "账号审核中" }, task: { title: "提交任务", btn: "领奖" }, adminLogin: { title: "管理员", btn: "进入" }, service: { title: "客服", desc: "扫码联系" } }
                 },
                 en: {
                     nav: ["Tasks", "Rewards", "Join"], hero: ["TikTok", "Recruitment"],
-                    subtitle: "TikTok Creator Program: 20 TWD per video! High view bonuses included.",
-                    calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee Monthly", pro: "Red Creator Monthly",
+                    subtitle: "TikTok Program: 20 TWD per video! Extra bonuses included.",
+                    calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee", pro: "Red Creator",
                     statusPending: "Pending", upgradeBtnTxt: "Upgrade", successTxt: "Success", closeBtn: "Close",
-                    logic1: { t1: ["Basic Reward", "20", "Earn on post"], t2: ["Mid Bonus", "40", "500-5k views"], t3: ["Viral Bonus", "100+", "5k+ views"] },
-                    logic2: { title: "Levels & Perks", lv1: ["Trainee", "Zero Fee", "20/post", "5% Comm", "Basic"], lv2: ["Red Creator", "999 TWD", "30/post", "10% Comm", "VIP"], lv3: ["Mentor", "Deposit", "300+", "15% Comm", "Mgmt Fee"] },
-                    modals: {
-                        login: { title: "Login", desc: "Enter Phone/Email", placeholder: "Phone / Email", btn: "Next" },
-                        bind: { title: "Bind TikTok", desc: "Enter Link", placeholder: "TikTok Link", btn: "Submit" },
-                        pending: { title: "Review", desc: "Your account is under review." },
-                        task: { title: "Submit Task", desc: "Paste Video Link", placeholder: "Link", btn: "Claim" },
-                        adminLogin: { title: "Admin Login", desc: "Enter Password", placeholder: "Password", btn: "Login" },
-                        service: { title: "Support", desc: "Scan to Contact" }
-                    }
+                    logic1: { t1: ["Basic", "20", ""], t2: ["Mid", "40", ""], t3: ["Viral", "100+", ""] },
+                    logic2: { title: "Levels", lv1: ["Trainee", "", "20/p", "5%", ""], lv2: ["Red", "", "30/p", "10%", ""], lv3: ["Mentor", "", "300+", "15%", ""] },
+                    modals: { login: { title: "Login", btn: "Next" }, bind: { title: "Bind", btn: "Submit" }, pending: { title: "Pending", desc: "Reviewing..." }, task: { title: "Task", btn: "Claim" }, adminLogin: { title: "Admin", btn: "Login" }, service: { title: "Support", desc: "Scan QR" } }
                 }
             };
 
@@ -107,8 +96,24 @@
                 e.preventDefault();
                 setStatus("processing");
                 setTimeout(() => {
-                    if (modalType === "login") { setIsLoggedIn(true); setModalType("bind"); }
-                    else if (modalType === "bind") { setAccountStatus("pending"); setModalType("pending"); }
+                    if (modalType === "login") { 
+                        setIsLoggedIn(true); 
+                        setUserEmail(inputVal); // 存入用戶手機/Email
+                        setModalType("bind"); 
+                    }
+                    else if (modalType === "bind") { 
+                        setAccountStatus("pending"); 
+                        setUserTikTok(inputVal); // 存入用戶 TikTok
+                        // --- 核心邏輯：將數據送入後台列表 ---
+                        const newUser = {
+                            id: Date.now(),
+                            info: userEmail || "New User",
+                            tiktok: inputVal,
+                            time: new Date().toLocaleDateString()
+                        };
+                        setPendingUsers(prev => [newUser, ...prev]);
+                        setModalType("pending"); 
+                    }
                     else if (modalType === "adminLogin") {
                         if (inputVal === "admin888") { setView("admin"); setShowModal(false); }
                         else { alert(lang === 'en' ? "Wrong Password" : "密碼錯誤"); }
@@ -188,19 +193,21 @@
                         </>
                     ) : (
                         <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}>
-                           <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'30px'}}><h2>後台系統</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px'}}>退出</button></div>
+                           <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'30px'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div>
                            <div className="admin-card">
                                <p>換客服二維碼 URL:</p>
                                <input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.modalInput} />
-                               <img src={qrCodeUrl} style={{width:'80px', marginTop:'10px'}} />
+                               <img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} />
                            </div>
                            <div className="admin-card">
-                               <p>創客審核列表:</p>
-                               {pendingUsers.map(u => (
-                                   <div key={u.id} style={{padding:'10px', borderBottom:'1px solid #222'}}>
-                                       <small>{u.info}</small><br/>
-                                       <a href={u.tiktok} target="_blank" style={{fontSize:'10px', color:'#00f2ea'}}>{u.tiktok}</a><br/>
-                                       <button style={{background:'#00f2ea', border:'none', padding:'5px 10px', borderRadius:'5px', marginTop:'5px'}} onClick={()=>setPendingUsers(prev=>prev.filter(x=>x.id!==u.id))}>核准</button>
+                               <p>創客審核列表 (實時更新):</p>
+                               {pendingUsers.length === 0 ? <p style={{color:'#444'}}>暫無申請</p> : pendingUsers.map(u => (
+                                   <div key={u.id} style={{padding:'15px', background:'#000', borderBottom:'1px solid #222', borderRadius:'10px', marginBottom:'10px'}}>
+                                       <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.info}</div>
+                                       <a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#fff', textDecoration:'underline'}}>{u.tiktok}</a><br/>
+                                       <div style={{textAlign:'right', marginTop:'10px'}}>
+                                           <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>setPendingUsers(prev=>prev.filter(x=>x.id!==u.id))}>核准通過</button>
+                                       </div>
                                    </div>
                                ))}
                            </div>
@@ -212,7 +219,7 @@
                             <div className="modal-content" onClick={e => e.stopPropagation()}>
                                 <h3 style={{marginBottom:'10px', fontSize:'18px', color:'#00f2ea'}}>{t.modals[modalType]?.title}</h3>
                                 {modalType === "service" ? (<img src={qrCodeUrl} alt="QR" style={{width:'120px', borderRadius:'10px', border:'2px solid #00f2ea'}} />) : 
-                                 status === 'success' ? (<div style={{color:'#00f2ea', padding:'10px', fontWeight:'bold'}}>✔ SUCCESS</div>) : (
+                                 status === 'success' ? (<div style={{color:'#00f2ea', fontWeight:'bold'}}>✔ SUCCESS</div>) : (
                                     <form onSubmit={executeLogic} style={{width:'100%'}}>
                                         {modalType === "pending" ? <p style={{color:'#888', fontSize:'13px'}}>{t.modals.pending.desc}</p> : (
                                             <>
