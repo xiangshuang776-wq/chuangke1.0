@@ -27,6 +27,9 @@
 
             const [showModal, setShowModal] = useState(false);
             const [modalType, setModalType] = useState("login"); 
+            
+            // --- 註冊表單數據 ---
+            const [regForm, setRegForm] = useState({ name: "", phone: "", email: "", pass: "" });
             const [inputVal, setInputVal] = useState("");
             const [inputPass, setInputPass] = useState("");
             const [status, setStatus] = useState("idle");
@@ -66,7 +69,7 @@
                 },
                 en: {
                     nav: ["Tasks", "Rank", "Join"], hero: ["TikTok", "Recruitment"],
-                    subtitle: "Earn 20 TWD per post! High view bonuses included.",
+                    subtitle: "Earn 20 TWD per video! High view bonuses included.",
                     calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee", pro: "Red Creator",
                     rankTitle: "Creator Privilege Levels",
                     lv1: ["Trainee", "Zero Fee", "20/post", "5% Comm", "Basic"], 
@@ -84,8 +87,10 @@
                 e.preventDefault();
                 setStatus("processing");
                 setTimeout(() => {
-                    if (modalType === "register") { alert("註冊成功！請登錄。"); setModalType("login"); } 
-                    else if (modalType === "login") {
+                    if (modalType === "register") {
+                        alert("註冊成功！請登錄。");
+                        setModalType("login");
+                    } else if (modalType === "login") {
                         setCurrentUser({ email: inputVal, balance: 120, status: "pending", tiktok: "" });
                         setView("userDash"); setShowModal(false);
                     } else if (modalType === "adminLogin") {
@@ -118,7 +123,7 @@
                         .square-card { aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: center; align-items: center; transition: 0.3s; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); flex: 1; border-radius: 14px; cursor: pointer; }
                         .join-btn-bottom { width: 100%; max-width: 500px; background: #111; border: 1.5px solid #00f2ea; color: #00f2ea; padding: 16px; border-radius: 50px; font-weight: 900; font-size: 15px; letter-spacing: 3px; cursor: pointer; box-shadow: 0 0 20px rgba(0, 242, 234, 0.2); }
                         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-                        .modal-content { background: #111; border: 1px solid #222; padding: 25px; border-radius: 24px; width: 300px; height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-sizing: border-box; }
+                        .modal-content { background: #111; border: 1px solid #222; padding: 25px; border-radius: 24px; width: 300px; height: auto; min-height: 350px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; }
                         .input-box { width: 100%; background: #000; border: 1px solid #333; padding: 12px; border-radius: 10px; color: #fff; margin-bottom: 10px; box-sizing: border-box; outline:none; font-size: 14px; }
                         .win-marquee { position: absolute; top: -35px; left: 0; width: 100%; font-size: 12px; color: #00f2ea; white-space: nowrap; overflow: hidden; }
                         .win-marquee span { display: inline-block; animation: marquee 15s linear infinite; }
@@ -135,13 +140,9 @@
                     {view === "creator" ? (
                         <div style={{paddingBottom:'130px'}}>
                             <header style={{textAlign:'center', padding:'80px 20px 40px'}}><h1 className="hero-title" style={{fontWeight:'900', lineHeight:1.1}}>{t.hero[0]}<br/><span style={{background:'linear-gradient(90deg, #00f2ea, #fff, #ff0050)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'}}>{t.hero[1]}</span></h1><p style={{color:'#666', fontSize:'14px', marginTop:'15px'}}>{t.subtitle}</p></header>
-                            
-                            <section style={{maxWidth:'1000px', margin:'0 auto', padding:'0 20px'}}><div style={{display:'flex', gap:'15px'}}>{[["基礎獎勵", "20"], ["流量獎金", "40"], ["爆款獎勵", "100+"]].map((it, i)=>(<div key={i} className="square-card" onClick={()=>setShowModal(true)}><div style={{fontSize:'8px', color:'#00f2ea'}}>STEP 0{i+1}</div><h3 style={{fontSize:'12px', margin:'2px 0'}}>{it[0]}</h3><div className="price-val" style={{fontSize:'24px', fontWeight:'900'}}>{it[1]}</div><div style={{fontSize:'10px', color:'#666'}}>TWD</div></div>))}</div></section>
-                            
+                            <section style={{maxWidth:'1000px', margin:'0 auto', padding:'0 20px'}}><div className="horizontal-grid" style={{display:'flex', gap:'15px'}}>{[["基礎獎勵", "20"], ["流量獎金", "40"], ["爆款獎勵", "100+"]].map((it, i)=>(<div key={i} className="square-card" onClick={()=>setShowModal(true)}><div style={{fontSize:'8px', color:'#00f2ea'}}>STEP 0{i+1}</div><h3 style={{fontSize:'12px', margin:'2px 0'}}>{it[0]}</h3><div className="price-val" style={{fontSize:'24px', fontWeight:'900'}}>{it[1]}</div><div style={{fontSize:'10px', color:'#666'}}>TWD</div></div>))}</div></section>
                             <section style={{maxWidth:'1000px', margin:'40px auto', padding:'0 20px'}}><div style={{background:'rgba(255,255,255,0.01)', border:'1px solid #111', padding:'30px', borderRadius:'30px'}}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize: '20px'}}>{t.calcTitle}</h2><input type="range" min="1" max="20" value={videoCount} onChange={(e)=>setVideoCount(e.target.value)} style={{width:'100%', accentColor:'#00f2ea'}} /><div style={{display:'flex', gap:'15px', marginTop:'20px'}}><div style={{flex:1, textAlign:'center', padding:'20px', background:'rgba(255,255,255,0.01)', borderRadius:'12px'}}><div>{t.normal}</div><strong>{videoCount * 2000} TWD</strong></div><div style={{flex:1, textAlign:'center', padding:'20px', background:'rgba(255,255,255,0.01)', borderRadius:'12px', border: '1px solid #00f2ea'}}><div style={{color:'#00f2ea'}}>{t.pro}</div><strong style={{color:'#00f2ea'}}>{videoCount * 4800} TWD+</strong></div></div></div></section>
-                            
                             <section style={{maxWidth:'1000px', margin:'0 auto 40px', padding:'0 20px'}}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize:'20px'}}>{t.rankTitle}</h2><div style={{display:'flex', gap:'15px', flexWrap:'wrap'}}>{[t.lv1, t.lv2, t.lv3].map((lv, i)=>(<div key={i} style={{flex: 1, padding: '25px', background: '#0a0a0a', border: i===1?'1px solid #00f2ea':'1px solid #1a1a1a', borderRadius: '20px', textAlign: 'center', minWidth: '260px'}}><h3 style={{color: i===1?'#00f2ea':i===2?'#ff0050':'#fff', fontSize: '18px'}}>{lv[0]}</h3><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[2]}</div><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[3]}</div><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[4]}</div>{i===1 && <button onClick={()=>setShowModal(true)} style={{background:'linear-gradient(90deg, #ff0050, #00f2ea)', border:'none', color:'#fff', width:'100%', padding:'10px', borderRadius:'10px', marginTop:'10px', fontWeight:'bold'}}>立即升級</button>}</div>))}</div></section>
-
                             <div className="bottom-nav-bar" style={styles.bottomBar}>
                                 <div className="win-marquee"><span>🔥 用戶 091*** 成功提現 12,000 TWD | 用戶 test*** 獲得爆款獎金 1,500 TWD | 創客計畫火熱進行中...</span></div>
                                 <button className="join-btn-bottom" onClick={()=>currentUser?setView("userDash"):setShowModal(true)}>{currentUser ? "進入個人中心" : "立即加入創客計畫"}</button>
@@ -156,14 +157,28 @@
                             <button onClick={()=>setView("creator")} style={{background:'none', border:'1px solid #333', color:'#666', width:'100%', padding:'10px', borderRadius:'12px', cursor:'pointer'}}>返回首頁</button>
                         </div>
                     ) : (
-                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div><div style={styles.card}><p>更換客服二維碼:</p><input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.inputBox} /><img src={qrCodeUrl} style={{width:'80px', marginTop:'10px'}} /></div><div style={styles.card}><p>待審核列表:</p>{pendingUsers.map(u=>(<div key={u.id} style={{padding:'15px', borderBottom:'1px solid #222'}}><small>用戶: {u.info}</small><br/><a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#00f2ea'}}>{u.tiktok}</a><br/><button style={styles.btnCyan} onClick={()=>{setCurrentUser(prev=>({...prev, status:'approved'})); setView("admin"); alert("已准予通過");}}>准予通過</button></div>))}</div></div>
+                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div><div style={styles.card}><p>更換客服二維碼:</p><input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.inputBox} /><img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} /></div><div style={styles.card}><p>待審核列表 (實時更新):</p>{pendingUsers.map(u => (
+                            <div key={u.id} style={{padding:'15px', background:'#000', borderBottom:'1px solid #222', borderRadius:'10px', marginBottom:'10px'}}>
+                                <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.info}</div>
+                                <a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#fff', textDecoration:'underline'}}>{u.tiktok}</a><br/>
+                                <div style={{textAlign:'right', marginTop:'10px'}}>
+                                    <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>setPendingUsers(prev=>prev.filter(x=>x.id!==u.id))}>核准通過</button>
+                                </div>
+                            </div>
+                        ))}</div></div>
                     )}
 
                     {showModal && (
                         <div className="modal-overlay" onClick={() => setShowModal(false)}><div className="modal-content" onClick={e=>e.stopPropagation()}><h3 style={{color:'#00f2ea', marginBottom:'15px'}}>{t.modals[modalType]?.title}</h3>
                         {modalType === 'service' ? (<img src={qrCodeUrl} style={{width:'150px', borderRadius:'10px', border:'2px solid #00f2ea'}} />) : (
                         <form onSubmit={handleAuth} style={{width:'100%'}}>
-                            <input required className="input-box" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder="手機號 / Email" />
+                            {modalType === 'register' && (
+                                <>
+                                    <input required className="input-box" placeholder="姓名" onChange={e=>setRegForm({...regForm, name:e.target.value})} />
+                                    <input required className="input-box" placeholder="電話號碼" onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
+                                </>
+                            )}
+                            <input required className="input-box" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder="Email" />
                             <input required className="input-box" type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="密碼" />
                             <button className="input-box" style={{background:'#00f2ea', color:'#000', fontWeight:'bold', border:'none', cursor:'pointer'}}>{status==='processing'?'...':t.modals[modalType]?.btn}</button>
                             {modalType==='login' && <div onClick={()=>setModalType("register")} style={{fontSize:'12px', color:'#666', cursor:'pointer', marginTop:'10px'}}>沒有帳號？立即註冊</div>}
