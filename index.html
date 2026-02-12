@@ -37,12 +37,13 @@
             };
             const handleLogoTouchEnd = () => clearTimeout(timerRef.current);
 
+            // 核心數據字典 - 確保翻譯功能全覆蓋
             const content = {
                 zh_tw: {
                     nav: ["任務大廳", "收益等級", "加入創客"], hero: ["TikTok", "創客達人招募"],
                     subtitle: "TikTok 創客加速計畫：只要發佈一條視頻就有 20 台幣！基礎/中/高播放獎金疊加。",
                     calcTitle: "預估月收入收益模擬", calcLabel: "每日預計發佈視頻數", normal: "見習創客月收益", pro: "紅創客月收益",
-                    statusPending: "審核中", upgradeBtnTxt: "立即升級", successTxt: "操作成功", closeBtn: "關閉",
+                    statusPending: "審核中", upgradeBtnTxt: "立即升級", successTxt: "操作成功", closeBtn: "關閉窗口",
                     logic1: { 
                         t1: ["基礎發佈獎勵", "20", "只要發佈成功且有基礎播放即可獲得"], 
                         t2: ["中級流量獎", "40", "500-5000 播放量區間階梯獎金"], 
@@ -62,6 +63,24 @@
                         adminLogin: { title: "管理員登錄", desc: "管理密碼", placeholder: "Password", btn: "進入" },
                         service: { title: "在線客服", desc: "掃描聯繫客服" }
                     }
+                },
+                zh_cn: {
+                    nav: ["任务大厅", "收益等级", "加入创客"], hero: ["TikTok", "创客达人招募"],
+                    subtitle: "TikTok 创客加速计划：只要发布一条视频就有 20 台币！基础/中/高播放奖金叠加。",
+                    calcTitle: "预估月收入收益模拟", calcLabel: "每日预计发布视频数", normal: "见习创客月收益", pro: "红创客月收益",
+                    statusPending: "审核中", upgradeBtnTxt: "立即升级", successTxt: "操作成功", closeBtn: "关闭",
+                    logic1: { t1: ["基础发布奖励", "20", "发布成功即得"], t2: ["中级流量奖", "40", "500-5k 播放"], t3: ["爆款高播放奖", "100+", "5k+ 播放奖金"] },
+                    logic2: { title: "创客等级与特权体系", lv1: ["见习创客", "无门槛", "20 TWD/条", "5% 提成", "基础结算"], lv2: ["红创客", "999 TWD", "30 TWD/条", "10% 提成", "专属素材"], lv3: ["导师级", "高额金", "300+ 奖金", "15% 提成", "管理津贴"] },
+                    modals: { login: { title: "登录", desc: "输入手机/邮箱", placeholder: "Phone/Email", btn: "下一步" }, bind: { title: "绑定 TikTok", desc: "提交主页链接", placeholder: "TikTok Link", btn: "提交" }, pending: { title: "审核中", desc: "账号审核中..." }, task: { title: "提交任务", desc: "粘贴视频链接", placeholder: "Link", btn: "领奖" }, adminLogin: { title: "管理登录", desc: "输入密码", placeholder: "Pass", btn: "确定" }, service: { title: "联系客服", desc: "扫码联系" } }
+                },
+                en: {
+                    nav: ["Tasks", "Rewards", "Join"], hero: ["TikTok", "Recruitment"],
+                    subtitle: "TikTok Program: Earn 20 TWD per post! Extra bonuses for high views.",
+                    calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee Monthly", pro: "Red Creator Monthly",
+                    statusPending: "Reviewing", upgradeBtnTxt: "Upgrade", successTxt: "Success", closeBtn: "Close",
+                    logic1: { t1: ["Basic Reward", "20", "Earn on post"], t2: ["Mid Traffic", "40", "500-5k views"], t3: ["Viral Reward", "100+", "5k+ views"] },
+                    logic2: { title: "Levels & Perks", lv1: ["Trainee", "Zero Fee", "20/post", "5% Comm", "Basic"], lv2: ["Red Creator", "999 TWD", "30/post", "10% Comm", "VIP"], lv3: ["Mentor", "Deposit", "300+ Bonus", "15% Comm", "Mgmt"] },
+                    modals: { login: { title: "Login", desc: "Enter Phone/Email", btn: "Next" }, bind: { title: "Bind TikTok", desc: "Enter Link", btn: "Submit" }, pending: { title: "Review", desc: "Reviewing account..." }, task: { title: "Submit Task", desc: "Paste Link", btn: "Claim" }, adminLogin: { title: "Admin", desc: "Pass", btn: "Login" }, service: { title: "Support", desc: "Scan QR" } }
                 }
             };
 
@@ -82,7 +101,7 @@
                     else if (modalType === "bind") { setAccountStatus("pending"); setModalType("pending"); }
                     else if (modalType === "adminLogin") {
                         if (inputVal === "admin888") { setView("admin"); setShowModal(false); }
-                        else { alert("密碼錯誤"); }
+                        else { alert(lang === 'en' ? "Wrong Password" : "密碼錯誤"); }
                     } else if (modalType === "task") {
                         setUserBalance(prev => prev + (isRedCreator ? 30 : 20));
                         setStatus("success");
@@ -120,10 +139,10 @@
                 <div style={styles.container}>
                     <style>{`
                         @media (max-width: 600px) { 
-                            .hero-title { font-size: 50px !important; } /* 抖音創客文字放大 */
+                            .hero-title { font-size: 50px !important; } 
                             .hero-subtitle { font-size: 13px !important; }
-                            .navbar-mobile-logo { font-size: 40px !important; } /* Logo 放大 1 倍 */
-                            .lang-switch-mobile { transform: scale(2.0); transform-origin: right; } /* 翻譯按鈕放大 1 倍 */
+                            .navbar-mobile-logo { font-size: 25px !important; } /* Logo 縮小 0.5 倍 */
+                            .lang-switch-mobile { transform: scale(1.5); transform-origin: right; } /* 翻譯按鈕功能優化 */
                             .horizontal-grid { gap: 8px !important; } 
                             .square-card h3 { font-size: 11px !important; } 
                             .square-card .price-val { font-size: 22px !important; }
@@ -152,23 +171,7 @@
                             position: relative;
                             overflow: hidden;
                         }
-                        .join-btn-bottom:hover { 
-                            background: #00f2ea; 
-                            color: #000; 
-                            box-shadow: 0 0 35px rgba(0, 242, 234, 0.5);
-                        }
-                        .join-btn-bottom::after {
-                            content: "";
-                            position: absolute;
-                            top: -50%;
-                            left: -50%;
-                            width: 200%;
-                            height: 200%;
-                            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-                            transform: rotate(45deg);
-                            transition: 0.8s;
-                        }
-                        .join-btn-bottom:hover::after { left: 120%; }
+                        .join-btn-bottom:hover { background: #00f2ea; color: #000; box-shadow: 0 0 35px rgba(0, 242, 234, 0.5); }
 
                         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
                         .modal-content { background: #111; border: 1px solid #222; padding: 20px; border-radius: 24px; width: 300px; height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; overflow: hidden; }
@@ -190,9 +193,9 @@
                                 <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
                                     {isLoggedIn && <div style={styles.walletBox}>TWD: {userBalance}</div>}
                                     <div className="lang-switch-mobile" style={styles.langSwitch}>
-                                        {['zh_tw', 'zh_cn', 'en'].map(l => (
-                                            <span key={l} onClick={()=>setLang(l)} style={{...styles.langItem, color: lang===l?'#00f2ea':'#555'}}>{l==='zh_tw'?'繁':l==='zh_cn'?'簡':'EN'}</span>
-                                        ))}
+                                        <span onClick={()=>setLang('zh_tw')} style={{...styles.langItem, color: lang==='zh_tw'?'#00f2ea':'#555'}}>繁</span>
+                                        <span onClick={()=>setLang('zh_cn')} style={{...styles.langItem, color: lang==='zh_cn'?'#00f2ea':'#555'}}>简</span>
+                                        <span onClick={()=>setLang('en')} style={{...styles.langItem, color: lang==='en'?'#00f2ea':'#555'}}>EN</span>
                                     </div>
                                 </div>
                             </nav>
@@ -251,7 +254,6 @@
 
                             <div className="float-service" onClick={() => { setModalType("service"); setShowModal(true); }}><span style={{fontSize:'24px'}}>💬</span></div>
                             
-                            {/* 底部導航懸浮按鈕 */}
                             <div className="bottom-nav-bar">
                                 <button className="join-btn-bottom" onClick={handleAction}>
                                     {isLoggedIn ? (accountStatus==='pending' ? t.statusPending : t.nav[2]) : t.nav[2]}
