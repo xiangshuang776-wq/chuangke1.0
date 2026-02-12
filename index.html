@@ -111,51 +111,50 @@
             };
 
             const styles = {
-                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif' },
+                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif', paddingBottom: '100px' },
                 navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 4%', borderBottom: '1px solid #111', background: '#050505', position: 'sticky', top: 0, zIndex: 100 },
                 logo: { fontSize: '20px', fontWeight: '900', cursor: 'pointer', userSelect: 'none' },
                 langSwitch: { display: 'flex', gap: '8px' },
                 langItem: { fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' },
-                hero: { textAlign: 'center', padding: '60px 20px 40px' },
-                heroTitle: { fontSize: 'clamp(40px, 10vw, 80px)', fontWeight: '900', lineHeight: 1.1 },
+                hero: { textAlign: 'center', padding: '80px 20px 40px' },
+                heroTitle: { fontSize: 'clamp(34px, 8vw, 70px)', fontWeight: '900', lineHeight: 1.1 },
                 gradientText: { background: 'linear-gradient(90deg, #00f2ea, #fff, #ff0050)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-                heroSubtitle: { color: '#666', maxWidth: '600px', margin: '20px auto', fontSize: '16px', lineHeight: 1.6 },
+                heroSubtitle: { color: '#666', maxWidth: '500px', margin: '15px auto', fontSize: '14px', lineHeight: 1.5 },
                 section: { maxWidth: '1000px', margin: '0 auto', padding: '0 20px' },
                 horizontalGrid: { display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'nowrap' },
                 calcContainer: { background: 'rgba(255,255,255,0.01)', border: '1px solid #111', padding: '30px', borderRadius: '30px' },
-                calcRes: { flex: 1, padding: '25px', borderRadius: '15px', background: 'rgba(255,255,255,0.01)', textAlign:'center' },
-                memberGrid: { display: 'flex', gap: '20px', flexWrap: 'wrap' },
-                memberCard: { flex: 1, padding: '30px', background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '24px', textAlign: 'center', minWidth: '280px' },
-                lvPoint: { fontSize: '14px', color: '#777', margin: '10px 0', textAlign: 'left', paddingLeft: '10%' },
-                upgradeBtn: { background: 'linear-gradient(90deg, #ff0050, #00f2ea)', border: 'none', color: '#fff', width:'100%', padding:'12px', borderRadius:'12px', marginTop:'20px', fontWeight:'bold', cursor: 'pointer' },
+                calcRes: { flex: 1, padding: '20px', borderRadius: '12px', background: 'rgba(255,255,255,0.01)', textAlign:'center' },
+                memberGrid: { display: 'flex', gap: '15px', flexWrap: 'wrap' },
+                memberCard: { flex: 1, padding: '25px', background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', textAlign: 'center', minWidth: '260px' },
+                lvPoint: { fontSize: '12px', color: '#777', margin: '8px 0', textAlign: 'left', paddingLeft: '10%' },
+                upgradeBtn: { background: 'linear-gradient(90deg, #ff0050, #00f2ea)', border: 'none', color: '#fff', width:'100%', padding:'10px', borderRadius:'10px', marginTop:'15px', fontWeight:'bold', cursor: 'pointer' },
                 modalInput: { width: '100%', background: '#000', border: '1px solid #333', padding: '15px', borderRadius: '12px', color: '#fff', marginBottom: '20px', outline: 'none', boxSizing: 'border-box' },
                 modalBtn: { width: '100%', background: '#fff', color: '#000', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' },
-                cancelBtn: { background: 'none', color: '#444', border: 'none', width: '100%', marginTop: '10px', cursor: 'pointer', fontSize: '14px' },
-                navBtn: { background: '#fff', color: '#000', border: 'none', padding: '10px 30px', borderRadius: '30px', fontWeight: '900', cursor: 'pointer', fontSize: '16px', transition: '0.3s' },
-                walletBox: { background:'rgba(0,242,234,0.1)', padding:'5px 12px', borderRadius:'12px', fontSize:'13px', color:'#00f2ea' }
+                cancelBtn: { background: 'none', color: '#444', border: 'none', width: '100%', marginTop: '10px', cursor: 'pointer', fontSize: '12px' },
+                walletBox: { background:'rgba(0,242,234,0.1)', padding:'4px 10px', borderRadius:'10px', fontSize:'12px', color:'#00f2ea' }
             };
 
             return (
                 <div style={styles.container}>
                     <style>{`
-                        /* 手机端專用全局字體放大 1 倍 */
                         @media (max-width: 600px) { 
-                            body { font-size: 24px !important; }
-                            .hero-title { font-size: 64px !important; } 
-                            .hero-subtitle { font-size: 28px !important; }
-                            .horizontal-grid { gap: 12px !important; } 
-                            .square-card h3 { font-size: 22px !important; } 
-                            .square-card .price-val { font-size: 48px !important; }
-                            .nav-btn-mobile { transform: scale(2.0); margin-right: 30px; } /* 按鈕在手機端放大 3 倍視覺體積 */
-                            .calc-title { font-size: 36px !important; }
-                            .calc-res strong { font-size: 44px !important; }
+                            .hero-title { font-size: 34px !important; } 
+                            .hero-subtitle { font-size: 13px !important; }
+                            .horizontal-grid { gap: 8px !important; } 
+                            .square-card h3 { font-size: 11px !important; } 
+                            .square-card .price-val { font-size: 22px !important; }
                         }
                         .square-card { aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: 0.3s; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); min-width: 0; flex: 1; cursor: pointer;}
                         .square-card:hover { border-color: #00f2ea; transform: translateY(-3px); background: rgba(0,242,234,0.05); }
-                        .float-service { position: fixed; bottom: 30px; right: 20px; width: 65px; height: 65px; background: linear-gradient(135deg, #00f2ea, #ff0050); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; animation: pulse 2s infinite; }
+                        .float-service { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #00f2ea, #ff0050); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; animation: pulse 2s infinite; }
                         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,242,234,0.4); } 70% { box-shadow: 0 0 0 15px rgba(0,242,234,0); } 100% { box-shadow: 0 0 0 0 rgba(0,242,234,0); } }
                         
-                        /* 彈窗尺寸鎖定 300x300 */
+                        /* 底部懸浮黑紫漸變長條按鈕 */
+                        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 15px 5%; background: linear-gradient(to top, #000, transparent); z-index: 200; display: flex; justify-content: center; }
+                        .join-btn-bottom { width: 100%; max-width: 600px; background: linear-gradient(90deg, #1a0b2e, #4b0082, #1a0b2e); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 16px; border-radius: 50px; font-weight: 900; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: 0.4s; box-shadow: 0 5px 25px rgba(75, 0, 130, 0.4); text-transform: uppercase; }
+                        .join-btn-bottom:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(75, 0, 130, 0.6); border-color: #00f2ea; }
+                        .join-btn-bottom:active { transform: scale(0.98); }
+
                         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
                         .modal-content { background: #111; border: 1px solid #222; padding: 20px; border-radius: 24px; width: 300px; height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; overflow: hidden; }
                     `}</style>
@@ -165,12 +164,12 @@
                             <nav style={styles.navbar}>
                                 <div style={styles.logo} onMouseDown={handleLogoTouchStart} onMouseUp={handleLogoTouchEnd} onTouchStart={handleLogoTouchStart} onTouchEnd={handleLogoTouchEnd}>MAKER<span style={{color:'#00f2ea'}}>PRO</span></div>
                                 <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
+                                    {isLoggedIn && <div style={styles.walletBox}>TWD: {userBalance}</div>}
                                     <div style={styles.langSwitch}>
                                         {['zh_tw', 'zh_cn', 'en'].map(l => (
                                             <span key={l} onClick={()=>setLang(l)} style={{...styles.langItem, color: lang===l?'#00f2ea':'#555'}}>{l==='zh_tw'?'繁':l==='zh_cn'?'簡':'EN'}</span>
                                         ))}
                                     </div>
-                                    <button className="nav-btn-mobile" style={styles.navBtn} onClick={handleAction}>{isLoggedIn ? (accountStatus==='pending' ? t.statusPending : t.nav[2]) : t.nav[2]}</button>
                                 </div>
                             </nav>
 
@@ -182,43 +181,43 @@
                             <section style={styles.section}>
                                 <div className="horizontal-grid" style={styles.horizontalGrid}>
                                     {[t.logic1.t1, t.logic1.t2, t.logic1.t3].map((item, i) => (
-                                        <div key={i} className="square-card" onClick={handleAction} style={{borderRadius: '16px', padding: '10px'}}>
-                                            <div style={{fontSize: '12px', color: '#00f2ea', marginBottom: '5px'}}>STEP 0{i+1}</div>
-                                            <h3 style={{fontSize: '16px', marginBottom: '4px'}}>{item[0]}</h3>
-                                            <div className="price-val" style={{fontSize: '32px', fontWeight: '900'}}>{item[1]}</div>
-                                            <div style={{fontSize: '12px', color:'#666'}}>TWD</div>
+                                        <div key={i} className="square-card" onClick={handleAction} style={{borderRadius: '14px', padding: '10px'}}>
+                                            <div style={{fontSize: '8px', color: '#00f2ea', marginBottom: '4px'}}>STEP 0{i+1}</div>
+                                            <h3 style={{fontSize: '12px', marginBottom: '2px'}}>{item[0]}</h3>
+                                            <div className="price-val" style={{fontSize: '24px', fontWeight: '900'}}>{item[1]}</div>
+                                            <div style={{fontSize: '10px', color:'#666'}}>TWD</div>
                                         </div>
                                     ))}
                                 </div>
                             </section>
 
-                            <section style={{...styles.section, margin:'60px auto'}}>
+                            <section style={{...styles.section, margin:'40px auto'}}>
                                 <div style={styles.calcContainer}>
-                                    <h2 className="calc-title" style={{textAlign:'center', marginBottom:'30px', fontSize: '24px'}}>{t.calcTitle}</h2>
-                                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:'15px', fontSize: '18px'}}>
+                                    <h2 className="calc-title" style={{textAlign:'center', marginBottom:'30px', fontSize: '20px'}}>{t.calcTitle}</h2>
+                                    <div style={{display:'flex', justifyContent:'space-between', marginBottom:'10px', fontSize: '14px'}}>
                                         <span>{t.calcLabel}</span>
                                         <span style={{color:'#00f2ea', fontWeight:'bold'}}>{videoCount} 條/日</span>
                                     </div>
                                     <input type="range" min="1" max="20" value={videoCount} onChange={(e)=>setVideoCount(e.target.value)} style={{width:'100%', accentColor:'#00f2ea'}} />
-                                    <div style={{display:'flex', gap:'15px', marginTop:'30px'}}>
+                                    <div style={{display:'flex', gap:'15px', marginTop:'20px'}}>
                                         <div className="calc-res" style={styles.calcRes}>
-                                            <div style={{fontSize:'12px', opacity:0.5}}>{t.normal}</div>
-                                            <strong style={{fontSize:'24px'}}>{videoCount * 2000} TWD</strong>
+                                            <div style={{fontSize:'11px', opacity:0.5}}>{t.normal}</div>
+                                            <strong style={{fontSize:'18px'}}>{videoCount * 2000} TWD</strong>
                                         </div>
                                         <div className="calc-res" style={{...styles.calcRes, border: '1px solid #00f2ea'}}>
-                                            <div style={{fontSize:'12px', color:'#00f2ea'}}>{t.pro}</div>
-                                            <strong style={{fontSize:'24px', color:'#00f2ea'}}>{videoCount * 4800} TWD+</strong>
+                                            <div style={{fontSize:'11px', color:'#00f2ea'}}>{t.pro}</div>
+                                            <strong style={{fontSize:'18px', color:'#00f2ea'}}>{videoCount * 4800} TWD+</strong>
                                         </div>
                                     </div>
                                 </div>
                             </section>
 
                             <section style={styles.section}>
-                                <h2 style={{textAlign:'center', marginBottom:'40px', fontSize: '24px'}}>{t.logic2.title}</h2>
+                                <h2 style={{textAlign:'center', marginBottom:'30px', fontSize: '20px'}}>{t.logic2.title}</h2>
                                 <div style={styles.memberGrid}>
                                     {[t.logic2.lv1, t.logic2.lv2, t.logic2.lv3].map((lv, i) => (
                                         <div key={i} style={{...styles.memberCard, border: i===1?'1px solid #00f2ea':'1px solid #1a1a1a'}}>
-                                            <h3 style={{color: i===1?'#00f2ea':i===2?'#ff0050':'#fff', fontSize: '20px'}}>{lv[0]}</h3>
+                                            <h3 style={{color: i===1?'#00f2ea':i===2?'#ff0050':'#fff', fontSize: '18px'}}>{lv[0]}</h3>
                                             <div style={styles.lvPoint}>✓ {lv[2]}</div><div style={styles.lvPoint}>✓ {lv[3]}</div><div style={styles.lvPoint}>✓ {lv[4]}</div>
                                             {i === 1 && <button onClick={()=>{if(!isLoggedIn) handleAction(); else setIsRedCreator(true)}} style={styles.upgradeBtn}>{isRedCreator ? 'ACTIVE' : t.upgradeBtnTxt}</button>}
                                         </div>
@@ -226,7 +225,14 @@
                                 </div>
                             </section>
 
-                            <div className="float-service" onClick={() => { setModalType("service"); setShowModal(true); }}><span style={{fontSize:'26px'}}>💬</span></div>
+                            <div className="float-service" onClick={() => { setModalType("service"); setShowModal(true); }}><span style={{fontSize:'24px'}}>💬</span></div>
+                            
+                            {/* 底部導航懸浮按鈕 */}
+                            <div className="bottom-nav-bar">
+                                <button className="join-btn-bottom" onClick={handleAction}>
+                                    {isLoggedIn ? (accountStatus==='pending' ? t.statusPending : t.nav[2]) : t.nav[2]}
+                                </button>
+                            </div>
                         </>
                     ) : (
                         <div style={{padding:'50px'}}><h2 style={{color:'#00f2ea'}}>Admin System</h2><button onClick={()=>setView("creator")} style={{padding:'10px 20px', borderRadius:'10px'}}>Exit Admin</button></div>
@@ -244,13 +250,13 @@
                                     <form onSubmit={executeLogic} style={{width:'100%'}}>
                                         {modalType === "pending" ? <p style={{color:'#888', fontSize:'13px'}}>{t.modals.pending.desc}</p> : (
                                             <>
-                                                <input required value={inputVal} onChange={e=>setInputVal(e.target.value)} type={modalType==="adminLogin"?"password":"text"} placeholder={t.modals[modalType]?.placeholder} style={{...styles.modalInput, padding:'10px', fontSize:'14px'}} />
-                                                <button type="submit" style={{...styles.modalBtn, padding:'10px'}}>{status === 'processing' ? "..." : t.modals[modalType]?.btn}</button>
+                                                <input required value={inputVal} onChange={e=>setInputVal(e.target.value)} type={modalType==="adminLogin"?"password":"text"} placeholder={t.modals[modalType]?.placeholder} style={{...styles.modalInput, padding:'12px', fontSize:'14px'}} />
+                                                <button type="submit" style={{...styles.modalBtn, padding:'12px'}}>{status === 'processing' ? "..." : t.modals[modalType]?.btn}</button>
                                             </>
                                         )}
                                     </form>
                                 )}
-                                <button type="button" onClick={()=>setShowModal(false)} style={{...styles.cancelBtn, marginTop:'15px'}}>{t.closeBtn}</button>
+                                <button type="button" onClick={()=>setShowModal(false)} style={{...styles.cancelBtn, marginTop:'10px'}}>{t.closeBtn}</button>
                             </div>
                         </div>
                     )}
