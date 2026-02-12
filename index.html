@@ -27,8 +27,6 @@
 
             const [showModal, setShowModal] = useState(false);
             const [modalType, setModalType] = useState("login"); 
-            
-            // --- 註冊與登錄數據 ---
             const [regForm, setRegForm] = useState({ name: "", phone: "", email: "", pass: "" });
             const [inputVal, setInputVal] = useState("");
             const [inputPass, setInputPass] = useState("");
@@ -36,7 +34,12 @@
 
             const timerRef = useRef(null);
             const handleLogoTouchStart = () => {
-                timerRef.current = setTimeout(() => { setModalType("adminLogin"); setShowModal(true); }, 2000);
+                timerRef.current = setTimeout(() => { 
+                    setModalType("adminLogin"); 
+                    setInputVal(""); 
+                    setInputPass(""); 
+                    setShowModal(true); 
+                }, 2000);
             };
             const handleLogoTouchEnd = () => clearTimeout(timerRef.current);
 
@@ -95,7 +98,8 @@
                         setView("userDash"); setShowModal(false);
                     } else if (modalType === "adminLogin") {
                         if (inputPass === "admin888") { 
-                            setView("admin"); setShowModal(false); 
+                            setView("admin"); 
+                            setShowModal(false); 
                         } else { alert("管理密碼錯誤！"); }
                     }
                     setStatus("idle"); setInputVal(""); setInputPass("");
@@ -141,12 +145,12 @@
                     {view === "creator" ? (
                         <div style={{paddingBottom:'130px'}}>
                             <header style={{textAlign:'center', padding:'80px 20px 40px'}}><h1 className="hero-title" style={{fontWeight:'900', lineHeight:1.1}}>{t.hero[0]}<br/><span style={{background:'linear-gradient(90deg, #00f2ea, #fff, #ff0050)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'}}>{t.hero[1]}</span></h1><p style={{color:'#666', fontSize:'14px', marginTop:'15px'}}>{t.subtitle}</p></header>
-                            <section style={{maxWidth:'1000px', margin:'0 auto', padding:'0 20px'}}><div className="horizontal-grid" style={{display:'flex', gap:'15px'}}>{[["基礎獎勵", "20"], ["流量獎金", "40"], ["爆款獎勵", "100+"]].map((it, i)=>(<div key={i} className="square-card" onClick={()=>setShowModal(true)}><div style={{fontSize:'8px', color:'#00f2ea'}}>STEP 0{i+1}</div><h3 style={{fontSize:'12px', margin:'2px 0'}}>{it[0]}</h3><div className="price-val" style={{fontSize:'24px', fontWeight:'900'}}>{it[1]}</div><div style={{fontSize:'10px', color:'#666'}}>TWD</div></div>))}</div></section>
+                            <section style={{maxWidth:'1000px', margin:'0 auto', padding:'0 20px'}}><div className="horizontal-grid" style={{display:'flex', gap:'15px'}}>{[["基礎獎勵", "20"], ["流量獎金", "40"], ["爆款獎勵", "100+"]].map((it, i)=>(<div key={i} className="square-card" onClick={()=>{setModalType("login"); setShowModal(true)}}><div style={{fontSize:'8px', color:'#00f2ea'}}>STEP 0{i+1}</div><h3 style={{fontSize:'12px', margin:'2px 0'}}>{it[0]}</h3><div className="price-val" style={{fontSize:'24px', fontWeight:'900'}}>{it[1]}</div><div style={{fontSize:'10px', color:'#666'}}>TWD</div></div>))}</div></section>
                             <section style={{maxWidth:'1000px', margin:'40px auto', padding:'0 20px'}}><div style={{background:'rgba(255,255,255,0.01)', border:'1px solid #111', padding:'30px', borderRadius:'30px'}}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize: '20px'}}>{t.calcTitle}</h2><input type="range" min="1" max="20" value={videoCount} onChange={(e)=>setVideoCount(e.target.value)} style={{width:'100%', accentColor:'#00f2ea'}} /><div style={{display:'flex', gap:'15px', marginTop:'20px'}}><div style={{flex:1, textAlign:'center', padding:'20px', background:'rgba(255,255,255,0.01)', borderRadius:'12px'}}><div>{t.normal}</div><strong>{videoCount * 2000} TWD</strong></div><div style={{flex:1, textAlign:'center', padding:'20px', background:'rgba(255,255,255,0.01)', borderRadius:'12px', border: '1px solid #00f2ea'}}><div style={{color:'#00f2ea'}}>{t.pro}</div><strong style={{color:'#00f2ea'}}>{videoCount * 4800} TWD+</strong></div></div></div></section>
-                            <section style={{maxWidth:'1000px', margin:'0 auto 40px', padding:'0 20px'}}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize:'20px'}}>{t.rankTitle}</h2><div style={{display:'flex', gap:'15px', flexWrap:'wrap'}}>{[t.lv1, t.lv2, t.lv3].map((lv, i)=>(<div key={i} style={{flex: 1, padding: '25px', background: '#0a0a0a', border: i===1?'1px solid #00f2ea':'1px solid #1a1a1a', borderRadius: '20px', textAlign: 'center', minWidth: '260px'}}><h3 style={{color: i===1?'#00f2ea':i===2?'#ff0050':'#fff', fontSize: '18px'}}>{lv[0]}</h3><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[2]}</div><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[3]}</div><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[4]}</div>{i===1 && <button onClick={()=>setShowModal(true)} style={{background:'linear-gradient(90deg, #ff0050, #00f2ea)', border:'none', color:'#fff', width:'100%', padding:'10px', borderRadius:'10px', marginTop:'10px', fontWeight:'bold'}}>立即升級</button>}</div>))}</div></section>
+                            <section style={{maxWidth:'1000px', margin:'0 auto 40px', padding:'0 20px'}}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize:'20px'}}>{t.rankTitle}</h2><div style={{display:'flex', gap:'15px', flexWrap:'wrap'}}>{[t.lv1, t.lv2, t.lv3].map((lv, i)=>(<div key={i} style={{flex: 1, padding: '25px', background: '#0a0a0a', border: i===1?'1px solid #00f2ea':'1px solid #1a1a1a', borderRadius: '20px', textAlign: 'center', minWidth: '260px'}}><h3 style={{color: i===1?'#00f2ea':i===2?'#ff0050':'#fff', fontSize: '18px'}}>{lv[0]}</h3><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[2]}</div><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[3]}</div><div style={{fontSize:'12px', color:'#777', margin:'10px 0'}}>✓ {lv[4]}</div>{i===1 && <button onClick={()=>{setModalType("login"); setShowModal(true)}} style={{background:'linear-gradient(90deg, #ff0050, #00f2ea)', border:'none', color:'#fff', width:'100%', padding:'10px', borderRadius:'10px', marginTop:'10px', fontWeight:'bold'}}>立即升級</button>}</div>))}</div></section>
                             <div className="bottom-nav-bar" style={styles.bottomBar}>
                                 <div className="win-marquee"><span>🔥 用戶 091*** 成功提現 12,000 TWD | 用戶 test*** 獲得爆款獎金 1,500 TWD | 創客計畫火熱進行中...</span></div>
-                                <button className="join-btn-bottom" onClick={()=>currentUser?setView("userDash"):setShowModal(true)}>{currentUser ? "進入個人中心" : "立即加入創客計畫"}</button>
+                                <button className="join-btn-bottom" onClick={()=>currentUser?setView("userDash"):(() => {setModalType("login"); setShowModal(true);})()}>{currentUser ? "進入個人中心" : "立即加入創客計畫"}</button>
                             </div>
                         </div>
                     ) : view === "userDash" ? (
