@@ -62,24 +62,6 @@
                         adminLogin: { title: "管理員登錄", desc: "管理密碼", placeholder: "Password", btn: "進入" },
                         service: { title: "在線客服", desc: "掃描聯繫客服" }
                     }
-                },
-                zh_cn: {
-                    nav: ["任务大厅", "收益等级", "加入创客"], hero: ["TikTok", "创客达人招募"],
-                    subtitle: "TikTok 创客加速计划：只要发布一条视频就有 20 台币！基础/中/高播放奖金叠加。",
-                    calcTitle: "预估月收入收益模拟", calcLabel: "每日预计发布视频数", normal: "见习创客月收益", pro: "红创客月收益",
-                    statusPending: "审核中", upgradeBtnTxt: "立即升级", successTxt: "操作成功", closeBtn: "关闭",
-                    logic1: { t1: ["基础发布奖励", "20", ""], t2: ["中级流量奖", "40", ""], t3: ["爆款高播放奖", "100+", ""] },
-                    logic2: { title: "创客等级与特权体系", lv1: ["见习创客", "", "20 TWD/条", "5% 提成", "基础结算"], lv2: ["红创客", "", "30 TWD/条", "10% 提成", "专属素材"], lv3: ["导师级", "", "300+ 奖金", "15% 提成", "管理津贴"] },
-                    modals: { login: { title: "登录", desc: "请输入手机/邮箱", btn: "下一步" }, bind: { title: "绑定 TikTok", btn: "提交" }, pending: { title: "审核中", desc: "账号审核中" }, task: { title: "提交任务", btn: "领取" }, adminLogin: { title: "管理员", btn: "进入" }, service: { title: "在线客服", desc: "扫描二维码" } }
-                },
-                en: {
-                    nav: ["Tasks", "Rewards", "Join Now"], hero: ["TikTok", "Recruitment"],
-                    subtitle: "Earn 20 TWD per post! Bonuses included.",
-                    calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee Monthly", pro: "Red Creator Monthly",
-                    statusPending: "Reviewing", upgradeBtnTxt: "Upgrade", successTxt: "Success", closeBtn: "Close",
-                    logic1: { t1: ["Basic", "20", ""], t2: ["Mid", "40", ""], t3: ["Viral", "100+", ""] },
-                    logic2: { title: "Creator Levels", lv1: ["Trainee", "", "20/post", "5%", "Basic"], lv2: ["Red Creator", "", "30/post", "10%", "VIP"], lv3: ["Mentor", "", "300+", "15%", "Mgmt"] },
-                    modals: { login: { title: "Login", btn: "Next" }, bind: { title: "Bind", btn: "Submit" }, pending: { title: "Review", desc: "Reviewing..." }, task: { title: "Submit", btn: "Claim" }, adminLogin: { title: "Admin", btn: "Login" }, service: { title: "Support", desc: "Scan QR" } }
                 }
             };
 
@@ -100,7 +82,7 @@
                     else if (modalType === "bind") { setAccountStatus("pending"); setModalType("pending"); }
                     else if (modalType === "adminLogin") {
                         if (inputVal === "admin888") { setView("admin"); setShowModal(false); }
-                        else { alert(lang === 'en' ? "Wrong Password" : "密碼錯誤"); }
+                        else { alert("密碼錯誤"); }
                     } else if (modalType === "task") {
                         setUserBalance(prev => prev + (isRedCreator ? 30 : 20));
                         setStatus("success");
@@ -111,10 +93,10 @@
             };
 
             const styles = {
-                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif', paddingBottom: '100px' },
+                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif', paddingBottom: '110px' },
                 navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 4%', borderBottom: '1px solid #111', background: '#050505', position: 'sticky', top: 0, zIndex: 100 },
                 logo: { fontSize: '20px', fontWeight: '900', cursor: 'pointer', userSelect: 'none' },
-                langSwitch: { display: 'flex', gap: '8px' },
+                langSwitch: { display: 'flex', gap: '12px' },
                 langItem: { fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' },
                 hero: { textAlign: 'center', padding: '80px 20px 40px' },
                 heroTitle: { fontSize: 'clamp(34px, 8vw, 70px)', fontWeight: '900', lineHeight: 1.1 },
@@ -138,22 +120,55 @@
                 <div style={styles.container}>
                     <style>{`
                         @media (max-width: 600px) { 
-                            .hero-title { font-size: 34px !important; } 
+                            .hero-title { font-size: 50px !important; } /* 抖音創客文字放大 */
                             .hero-subtitle { font-size: 13px !important; }
+                            .navbar-mobile-logo { font-size: 40px !important; } /* Logo 放大 1 倍 */
+                            .lang-switch-mobile { transform: scale(2.0); transform-origin: right; } /* 翻譯按鈕放大 1 倍 */
                             .horizontal-grid { gap: 8px !important; } 
                             .square-card h3 { font-size: 11px !important; } 
                             .square-card .price-val { font-size: 22px !important; }
                         }
                         .square-card { aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: 0.3s; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); min-width: 0; flex: 1; cursor: pointer;}
                         .square-card:hover { border-color: #00f2ea; transform: translateY(-3px); background: rgba(0,242,234,0.05); }
-                        .float-service { position: fixed; bottom: 100px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #00f2ea, #ff0050); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; animation: pulse 2s infinite; }
+                        .float-service { position: fixed; bottom: 110px; right: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #00f2ea, #ff0050); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 99; animation: pulse 2s infinite; }
                         @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,242,234,0.4); } 70% { box-shadow: 0 0 0 15px rgba(0,242,234,0); } 100% { box-shadow: 0 0 0 0 rgba(0,242,234,0); } }
                         
-                        /* 底部懸浮黑紫漸變長條按鈕 */
-                        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 15px 5%; background: linear-gradient(to top, #000, transparent); z-index: 200; display: flex; justify-content: center; }
-                        .join-btn-bottom { width: 100%; max-width: 600px; background: linear-gradient(90deg, #1a0b2e, #4b0082, #1a0b2e); border: 1px solid rgba(255,255,255,0.1); color: #fff; padding: 16px; border-radius: 50px; font-weight: 900; font-size: 16px; letter-spacing: 2px; cursor: pointer; transition: 0.4s; box-shadow: 0 5px 25px rgba(75, 0, 130, 0.4); text-transform: uppercase; }
-                        .join-btn-bottom:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(75, 0, 130, 0.6); border-color: #00f2ea; }
-                        .join-btn-bottom:active { transform: scale(0.98); }
+                        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px 5%; background: linear-gradient(to top, #000 80%, transparent); z-index: 200; display: flex; justify-content: center; }
+                        .join-btn-bottom { 
+                            width: 100%; 
+                            max-width: 500px; 
+                            background: #111; 
+                            border: 1.5px solid #00f2ea; 
+                            color: #00f2ea; 
+                            padding: 16px; 
+                            border-radius: 50px; 
+                            font-weight: 900; 
+                            font-size: 15px; 
+                            letter-spacing: 3px; 
+                            cursor: pointer; 
+                            transition: 0.4s; 
+                            box-shadow: 0 0 20px rgba(0, 242, 234, 0.15); 
+                            text-transform: uppercase;
+                            position: relative;
+                            overflow: hidden;
+                        }
+                        .join-btn-bottom:hover { 
+                            background: #00f2ea; 
+                            color: #000; 
+                            box-shadow: 0 0 35px rgba(0, 242, 234, 0.5);
+                        }
+                        .join-btn-bottom::after {
+                            content: "";
+                            position: absolute;
+                            top: -50%;
+                            left: -50%;
+                            width: 200%;
+                            height: 200%;
+                            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+                            transform: rotate(45deg);
+                            transition: 0.8s;
+                        }
+                        .join-btn-bottom:hover::after { left: 120%; }
 
                         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
                         .modal-content { background: #111; border: 1px solid #222; padding: 20px; border-radius: 24px; width: 300px; height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; overflow: hidden; }
@@ -162,10 +177,19 @@
                     {view === "creator" ? (
                         <>
                             <nav style={styles.navbar}>
-                                <div style={styles.logo} onMouseDown={handleLogoTouchStart} onMouseUp={handleLogoTouchEnd} onTouchStart={handleLogoTouchStart} onTouchEnd={handleLogoTouchEnd}>MAKER<span style={{color:'#00f2ea'}}>PRO</span></div>
+                                <div 
+                                    className="navbar-mobile-logo" 
+                                    style={styles.logo} 
+                                    onMouseDown={handleLogoTouchStart} 
+                                    onMouseUp={handleLogoTouchEnd} 
+                                    onTouchStart={handleLogoTouchStart} 
+                                    onTouchEnd={handleLogoTouchEnd}
+                                >
+                                    MAKER<span style={{color:'#00f2ea'}}>PRO</span>
+                                </div>
                                 <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
                                     {isLoggedIn && <div style={styles.walletBox}>TWD: {userBalance}</div>}
-                                    <div style={styles.langSwitch}>
+                                    <div className="lang-switch-mobile" style={styles.langSwitch}>
                                         {['zh_tw', 'zh_cn', 'en'].map(l => (
                                             <span key={l} onClick={()=>setLang(l)} style={{...styles.langItem, color: lang===l?'#00f2ea':'#555'}}>{l==='zh_tw'?'繁':l==='zh_cn'?'簡':'EN'}</span>
                                         ))}
