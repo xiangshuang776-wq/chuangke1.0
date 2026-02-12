@@ -8,231 +8,164 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        :root { --cyan: #00f2ea; --red: #ff0050; --bg: #050505; --card: #0a0a0a; }
-        body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .hero-title { font-weight: 900; line-height: 1.1; background: linear-gradient(90deg, var(--cyan), #fff, var(--red)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        @media (max-width: 600px) { 
-            .hero-title { font-size: 50px !important; text-align: center; } 
-            .nav-logo { transform: scale(0.5); transform-origin: left center; }
-            .lang-switch { transform: scale(2.0); transform-origin: right center; margin-right: 15px; }
-            .reward-grid { gap: 8px !important; }
-        }
-        .reward-grid { display: flex; flex-wrap: nowrap; gap: 15px; width: 100%; }
-        .reward-card { flex: 1; aspect-ratio: 1/1; background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 0; }
-        .sticky-btn-container { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px 0; background: linear-gradient(to top, #000 70%, transparent); display: flex; justify-content: center; z-index: 999; }
-        .sticky-btn { width: 90%; max-width: 500px; background: #000; border: 1.5px solid var(--cyan); color: var(--cyan); padding: 16px; border-radius: 50px; font-weight: 900; font-size: 16px; letter-spacing: 2px; cursor: pointer; box-shadow: 0 0 20px rgba(0,242,234,0.2); text-transform: uppercase; }
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-box { width: 320px; height: 350px; background: #111; border: 1px solid #222; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; align-items: center; box-sizing: border-box; }
-        .input-box { width: 100%; background: #000; border: 1px solid #333; color: white; padding: 10px; border-radius: 8px; box-sizing: border-box; margin-bottom: 10px; outline: none; font-size: 14px; }
-        .marquee-box { width: 100%; overflow: hidden; background: rgba(255,255,255,0.05); padding: 8px 0; border-radius: 10px; white-space: nowrap; margin-top: 15px; }
-        .marquee-content { display: inline-block; animation: marquee 20s linear infinite; font-size: 12px; color: var(--cyan); }
-        @keyframes marquee { from { transform: translateX(100%); } to { transform: translateX(-100%); } }
-    </style>
 </head>
-<body>
+<body style="margin:0; background:#050505; color: white; -webkit-tap-highlight-color: transparent;">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useRef } = React;
+        const { useState, useRef, useEffect } = React;
 
         function App() {
-            const [view, setView] = useState("home"); 
+            const [view, setView] = useState("creator"); 
             const [lang, setLang] = useState("zh_tw");
             const [videoCount, setVideoCount] = useState(10);
+            const [currentUser, setCurrentUser] = useState(null); 
+            const [qrCodeUrl, setQrCodeUrl] = useState("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAKERPRO_SERVICE");
+            
+            // --- 後台數據庫 ---
+            const [pendingUsers, setPendingUsers] = useState([
+                { id: 999, name: "測試員", phone: "0912345678", email: "test@maker.com", tiktok: "https://tiktok.com/@pro", status: "pending", time: "2026-02-13" }
+            ]);
+
             const [showModal, setShowModal] = useState(false);
             const [modalType, setModalType] = useState("login"); 
-            
-            const [users, setUsers] = useState([]); 
-            const [currentUser, setCurrentUser] = useState(null);
-            const [qrCodeUrl, setQrCodeUrl] = useState("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAKERPRO_SERVICE");
-            const [regForm, setRegForm] = useState({ name: '', phone: '', email: '', pass: '' });
-            const [loginForm, setLoginForm] = useState({ email: '', pass: '' });
+            const [regForm, setRegForm] = useState({ name: "", phone: "", email: "", pass: "" });
+            const [loginForm, setLoginForm] = useState({ email: "", pass: "" });
+            const [status, setStatus] = useState("idle");
 
             const timerRef = useRef(null);
-            const startAdminTimer = () => timerRef.current = setTimeout(() => { setModalType("adminLogin"); setShowModal(true); }, 2000);
-            const clearAdminTimer = () => clearTimeout(timerRef.current);
+            const handleLogoTouchStart = () => {
+                timerRef.current = setTimeout(() => { setModalType("adminLogin"); setShowModal(true); }, 2000);
+            };
+            const handleLogoTouchEnd = () => clearTimeout(timerRef.current);
 
-            const strings = {
+            const content = {
                 zh_tw: {
-                    hero: ["TikTok", "創客達人招募"], sub: "TikTok 創客加速計畫：獎金疊加，只要發佈就有收益。",
-                    calc: "預估月收入收益模擬", rank: "創客等級與特權體系",
-                    lv: ["見習創客", "紅創客", "導師級"], 
-                    status: ["尚未綁定", "⏳ 賬號審核中", "✅ 審核已通過", "❌ 駁回"],
-                    btn: ["立即加入創客計畫", "登錄", "註冊", "提現", "提交審核", "聯繫客服", "綁定 TikTok", "退出"],
-                    dash: ["當前餘額", "賬號狀態", "任務提交"],
-                    marquee: "🔥 恭喜用戶 091*** 提現 15,000 TWD！ | 恭喜用戶 王*明 審核通過，獲得獎勵 2,000 TWD | 新一期創客招募已開啟！"
+                    hero: ["TikTok", "創客達人招募"],
+                    subtitle: "只要發佈一條視頻就有 20 台幣！獎金疊加。",
+                    statusPending: "⏳ 賬號審核中", statusApproved: "✅ 審核已通過", statusRejected: "❌ 駁回：請聯繫客服",
+                    modals: { login: "創客登錄", register: "新創客註冊", adminLogin: "管理模式" }
                 },
                 zh_cn: {
-                    hero: ["TikTok", "创客达人招募"], sub: "TikTok 创客加速计划：奖金叠加，只要发布就有收益。",
-                    calc: "预估月收入收益模拟", rank: "创客等级与特权体系",
-                    lv: ["见习创客", "红创客", "导师级"], 
-                    status: ["尚未绑定", "⏳ 账号审核中", "✅ 审核已通过", "❌ 驳回"],
-                    btn: ["立即加入创客计划", "登录", "注册", "提现", "提交审核", "联系客服", "绑定 TikTok", "退出"],
-                    dash: ["当前余额", "账号状态", "任务提交"],
-                    marquee: "🔥 恭喜用户 091*** 提现 15,000 TWD！ | 恭喜用户 王*明 审核通过，获得奖励 2,000 TWD | 新一期创客招募已开启！"
+                    hero: ["TikTok", "创客达人招募"],
+                    subtitle: "只要发布一条视频就有 20 台币！奖金叠加。",
+                    statusPending: "⏳ 账号审核中", statusApproved: "✅ 审核已通过", statusRejected: "❌ 驳回：请联系客服",
+                    modals: { login: "创客登录", register: "新创客注册", adminLogin: "管理模式" }
                 },
                 en: {
-                    hero: ["TikTok", "Recruitment"], sub: "TikTok Creator Program: Post videos and earn high rewards.",
-                    calc: "Income Simulator", rank: "Creator Privilege System",
-                    lv: ["Trainee", "Red Creator", "Mentor"], 
-                    status: ["Unbound", "⏳ Pending", "✅ Approved", "❌ Rejected"],
-                    btn: ["Join Now", "Login", "Register", "Withdraw", "Submit", "Support", "Bind TikTok", "Logout"],
-                    dash: ["Balance", "Status", "Tasks"],
-                    marquee: "🔥 User 091*** withdrew 15,000 TWD! | User Wang** approved, reward 2,000 TWD | Join now!"
+                    hero: ["TikTok", "Recruitment"],
+                    subtitle: "Earn 20 TWD per video! Bonuses included.",
+                    statusPending: "Reviewing", statusApproved: "Approved", statusRejected: "Rejected",
+                    modals: { login: "Login", register: "Register", adminLogin: "Admin" }
                 }
             };
-            const t = strings[lang];
+            const t = content[lang] || content["zh_tw"];
 
+            // --- 註冊與登錄邏輯 ---
             const handleAuth = (e) => {
                 e.preventDefault();
-                if (modalType === "register") {
-                    setUsers([...users, { ...regForm, balance: 0, status: 0, tiktok: '' }]);
-                    alert("Success! Please Login."); setModalType("login");
-                } else if (modalType === "login") {
-                    const found = users.find(u => u.email === loginForm.email && u.pass === loginForm.pass);
-                    if (found) { setCurrentUser(found); setView("dashboard"); setShowModal(false); }
-                    else alert("Account Error");
-                } else if (modalType === "adminLogin") {
-                    if (loginForm.pass === "admin888") { setView("admin"); setShowModal(false); }
-                    else alert("Wrong Password");
-                }
+                setStatus("processing");
+                setTimeout(() => {
+                    if (modalType === "register") {
+                        alert("註冊成功！請登錄。");
+                        setModalType("login");
+                    } else if (modalType === "login") {
+                        setCurrentUser({ ...regForm, email: loginForm.email, balance: 0, status: "unbound", tiktok: "" });
+                        setView("userDash"); setShowModal(false);
+                    } else if (modalType === "adminLogin") {
+                        if (loginForm.email === "admin888") { setView("admin"); setShowModal(false); }
+                        else { alert("密碼錯誤"); }
+                    }
+                    setStatus("idle");
+                }, 800);
             };
 
-            const submitBind = (url) => {
-                const updated = { ...currentUser, tiktok: url, status: 1 };
-                setCurrentUser(updated);
-                setUsers(users.map(u => u.email === currentUser.email ? updated : u));
+            const styles = {
+                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif' },
+                navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 4%', borderBottom: '1px solid #111', background: '#050505', position: 'sticky', top: 0, zIndex: 100 },
+                card: { background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '25px', marginBottom: '15px' },
+                btnCyan: { background: '#00f2ea', color: '#000', border: 'none', padding: '10px 20px', borderRadius: '10px', fontWeight: 'bold', cursor:'pointer' }
             };
 
             return (
-                <div style={{minHeight: '100vh', display:'flex', flexDirection:'column'}}>
-                    <nav style={{display:'flex', justifyContent:'space-between', alignItems:'center', padding:'15px 4%', background: 'rgba(5,5,5,0.9)', zIndex:100}}>
-                        <div className="nav-logo" onMouseDown={startAdminTimer} onTouchStart={startAdminTimer} onMouseUp={clearAdminTimer} onTouchEnd={clearAdminTimer} style={{fontSize:24, fontWeight:900}}>MAKER<span style={{color: 'var(--cyan)'}}>PRO</span></div>
-                        <div className="lang-switch" style={{display:'flex', gap:10}}>
-                            {['zh_tw','zh_cn','en'].map(l => (
-                                <span key={l} onClick={()=>setLang(l)} style={{fontSize:12, cursor:'pointer', color: lang===l?'var(--cyan)':'#666', fontWeight:'bold'}}>{l==='en'?'EN':l==='zh_cn'?'简':'繁'}</span>
-                            ))}
+                <div style={styles.container}>
+                    <style>{`
+                        @media (max-width: 600px) { 
+                            .hero-title { font-size: 50px !important; } 
+                            .nav-logo-m { font-size: 25px !important; }
+                            .lang-switch-m { transform: scale(2.0); transform-origin: right; margin-right: 15px; }
+                            .horizontal-grid { gap: 8px !important; } 
+                            .square-card h3 { font-size: 11px !important; } .square-card .price-val { font-size: 22px !important; }
+                        }
+                        .square-card { aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); flex: 1; border-radius: 14px; }
+                        .join-btn-bottom { width: 100%; max-width: 500px; background: #111; border: 1.5px solid #00f2ea; color: #00f2ea; padding: 16px; border-radius: 50px; font-weight: 900; font-size: 15px; letter-spacing: 3px; cursor: pointer; }
+                        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+                        .modal-content { background: #111; border: 1px solid #222; padding: 25px; border-radius: 24px; width: 320px; text-align: center; box-sizing: border-box; }
+                        .input-box { width: 100%; background: #000; border: 1px solid #333; padding: 12px; border-radius: 10px; color: #fff; margin-bottom: 10px; outline:none; font-size: 14px; box-sizing: border-box; }
+                        .win-marquee { position: fixed; bottom: 85px; width: 100%; font-size: 12px; color: #00f2ea; overflow: hidden; background: rgba(0,0,0,0.8); padding: 5px 0; }
+                    `}</style>
+
+                    <nav style={styles.navbar}>
+                        <div className="nav-logo-m" style={{fontSize:'20px', fontWeight:'900', cursor:'pointer'}} onMouseDown={handleLogoTouchStart} onTouchStart={handleLogoTouchStart} onMouseUp={handleLogoTouchEnd} onTouchEnd={handleLogoTouchEnd}>MAKER<span style={{color:'#00f2ea'}}>PRO</span></div>
+                        <div className="lang-switch-m" style={{display:'flex', gap:'12px'}}>
+                            {['zh_tw', 'zh_cn', 'en'].map(l=>(<span key={l} onClick={()=>setLang(l)} style={{fontSize:'12px', cursor:'pointer', fontWeight:'bold', color:lang===l?'#00f2ea':'#555'}}>{l==='en'?'EN':l==='zh_cn'?'简':'繁'}</span>))}
                         </div>
                     </nav>
 
-                    {view === "home" && (
-                        <div style={{padding:'40px 20px 120px'}}>
-                            <header style={{textAlign:'center', marginBottom:40}}>
-                                <h1 className="hero-title">{t.hero[0]}<br/>{t.hero[1]}</h1>
-                                <p style={{color:'#666', fontSize:14, marginTop:15}}>{t.sub}</p>
-                            </header>
-
-                            <div className="reward-grid" style={{marginBottom:40}}>
-                                {[["基礎獎勵", "20"], ["流量獎金", "40"], ["爆款獎勵", "100+"]].map((item, i) => (
-                                    <div key={i} className="reward-card">
-                                        <div style={{fontSize:10, color: 'var(--cyan)'}}>STEP 0{i+1}</div>
-                                        <div style={{fontSize:12, margin:'5px 0'}}>{item[0]}</div>
-                                        <div style={{fontSize:24, fontWeight:900}}>{item[1]}</div>
-                                        <div style={{fontSize:10, color:'#555'}}>TWD</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div style={{background: 'var(--card)', padding:25, borderRadius:25, border: '1px solid #111', marginBottom:40}}>
-                                <h2 style={{fontSize:18, textAlign:'center', marginBottom:20}}>{t.calc}</h2>
-                                <input type="range" min="1" max="20" value={videoCount} onChange={e=>setVideoCount(e.target.value)} style={{width:'100%', accentColor: 'var(--cyan)'}} />
-                                <div style={{display:'flex', gap:15, marginTop:20}}>
-                                    <div style={{flex:1, textAlign:'center', background:'#000', padding:15, borderRadius:15, border:'1px solid #1a1a1a'}}>
-                                        <div style={{fontSize:11, color:'#666'}}>{t.lv[0]}</div>
-                                        <div style={{fontSize:18, fontWeight:900}}>{videoCount * 2000} TWD</div>
-                                    </div>
-                                    <div style={{flex:1, textAlign:'center', background:'#000', padding:15, borderRadius:15, border:'1.5px solid var(--cyan)'}}>
-                                        <div style={{fontSize:11, color:'var(--cyan)'}}>{t.lv[1]}</div>
-                                        <div style={{fontSize:18, fontWeight:900, color:'var(--cyan)'}}>{videoCount * 4800} TWD+</div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div style={{display:'flex', flexDirection:'column', gap:15}}>
-                                {[0,1,2].map(i => (
-                                    <div key={i} style={{background: 'var(--card)', padding:20, borderRadius:20, display:'flex', justifyContent:'space-between', border: i===1?'1px solid var(--cyan)':'1px solid #1a1a1a'}}>
-                                        <div><div style={{fontSize:14, fontWeight:900}}>{t.lv[i]}</div><div style={{fontSize:12, color:'#666'}}>Commission {5+i*5}%</div></div>
-                                        <div style={{fontSize:20, fontWeight:900}}>LV{i+1}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="sticky-btn-container">
-                                <button className="sticky-btn" onClick={()=>{setModalType("login"); setShowModal(true)}}>{t.btn[0]}</button>
-                            </div>
+                    {view === "creator" ? (
+                        <div style={{paddingBottom:'130px'}}>
+                            <header style={{textAlign:'center', padding:'80px 20px 40px'}}><h1 className="hero-title" style={{fontWeight:'900', lineHeight:1.1}}>{t.hero[0]}<br/><span style={{background:'linear-gradient(90deg, #00f2ea, #fff, #ff0050)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'}}>{t.hero[1]}</span></h1><p style={{color:'#666', fontSize:'14px', marginTop:'15px'}}>{t.subtitle}</p></header>
+                            <section style={{maxWidth:'1000px', margin:'0 auto', padding:'0 20px'}}><div className="horizontal-grid" style={{display:'flex', gap:'15px'}}>{[["基礎", "20"], ["流量", "40"], ["爆款", "100+"]].map((it, i)=>(<div key={i} className="square-card" onClick={()=>setShowModal(true)}><div style={{fontSize:'8px', color:'#00f2ea'}}>STEP 0{i+1}</div><h3 style={{fontSize:'12px'}}>{it[0]}</h3><div className="price-val" style={{fontSize:'24px', fontWeight:'900'}}>{it[1]}</div></div>))}</div></section>
+                            <section style={{maxWidth:'1000px', margin:'40px auto', padding:'30px', background:'rgba(255,255,255,0.01)', borderRadius:'30px', border:'1px solid #111'}}>
+                                <h2 style={{textAlign:'center', fontSize:'20px'}}>預估月收益</h2>
+                                <input type="range" min="1" max="20" value={videoCount} onChange={(e)=>setVideoCount(e.target.value)} style={{width:'100%', accentColor:'#00f2ea', margin:'20px 0'}} />
+                                <div style={{display:'flex', gap:'15px'}}><div style={{flex:1, textAlign:'center'}}>見習: {videoCount*2000} TWD</div><div style={{flex:1, textAlign:'center', color:'#00f2ea'}}>紅創客: {videoCount*4800} TWD+</div></div>
+                            </section>
+                            <div className="win-marquee"><marquee>🔥 用戶 091*** 提現 12,000 TWD | 用戶 test*** 獲得獎金 1,500 TWD</marquee></div>
+                            <div style={{position:'fixed', bottom:0, left:0, right:0, padding:'20px 5%', background:'linear-gradient(to top, #000, transparent)', display:'flex', justifyContent:'center'}}><button className="join-btn-bottom" onClick={()=>setShowModal(true)}>立即加入創客計畫</button></div>
                         </div>
-                    )}
-
-                    {view === "dashboard" && (
+                    ) : view === "userDash" ? (
                         <div style={{padding:'20px 5%'}}>
-                            <div style={{background: 'var(--card)', padding:20, borderRadius:20, display:'flex', justifyContent:'space-between', border:'1px solid var(--cyan)', marginBottom:20}}>
-                                <div><div style={{fontSize:12, color:'#666'}}>{currentUser.name}</div><div style={{fontSize:28, fontWeight:900, color: 'var(--cyan)'}}>{currentUser.balance} TWD</div></div>
-                                <button style={{background:'var(--cyan)', border:'none', padding:'10px 15px', borderRadius:10, fontWeight:'bold'}} onClick={()=>alert("Min 500 TWD")}>{t.btn[3]}</button>
-                            </div>
-
-                            <div style={{background: 'var(--card)', padding:20, borderRadius:20}}>
-                                <h3 style={{fontSize:16}}>{t.dash[1]}</h3>
-                                <div style={{padding:'15px', borderRadius:10, textAlign:'center', fontWeight:'bold', fontSize:18, background: '#000', border: '1px solid #222', color: currentUser.status===1?'#ffd700':currentUser.status===2?'var(--cyan)':currentUser.status===3?'var(--red)':'#fff'}}>
-                                    {t.status[currentUser.status]}
-                                </div>
-                                <div style={{marginTop:20}}>
-                                    {currentUser.status === 0 ? (
-                                        <>
-                                            <input className="input-box" id="tk" placeholder="TikTok Profile URL" />
-                                            <button style={{width:'100%', padding:12, borderRadius:10, background:'#fff', border:'none', fontWeight:'bold'}} onClick={()=>submitBind(document.getElementById('tk').value)}>{t.btn[6]}</button>
-                                        </>
-                                    ) : currentUser.status === 2 ? (
-                                        <button style={{width:'100%', padding:12, borderRadius:10, background: 'var(--cyan)', border:'none', fontWeight:'bold'}} onClick={()=>alert("Task Submitted")}>{t.btn[4]}</button>
-                                    ) : currentUser.status === 3 ? (
-                                        <button style={{width:'100%', padding:12, borderRadius:10, background: 'var(--red)', border:'none', fontWeight:'bold'}} onClick={()=>{setModalType("service"); setShowModal(true)}}>{t.btn[5]}</button>
-                                    ) : null}
-                                </div>
-                            </div>
-                            <div className="marquee-box"><div className="marquee-content">{t.marquee}</div></div>
-                            <button onClick={()=>setView("home")} style={{width:'100%', marginTop:30, background:'none', border:'1px solid #333', color:'#666', padding:10, borderRadius:10}}>{t.btn[7]}</button>
-                        </div>
-                    )}
-
-                    {view === "admin" && (
-                        <div style={{padding:'20px 5%'}}>
-                            <div style={{display:'flex', justifyContent:'space-between', marginBottom:20}}><h2>Admin</h2><button onClick={()=>setView("home")}>Exit</button></div>
-                            <div style={{background: 'var(--card)', padding:15, borderRadius:15, marginBottom:20}}>
-                                <p>Support QR URL:</p><input className="input-box" value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} />
-                            </div>
-                            {users.map((u, i) => (
-                                <div key={i} style={{background: 'var(--card)', padding:15, borderRadius:15, marginBottom:10}}>
-                                    <div>{u.name} | {u.email}</div><div style={{fontSize:12, color: 'var(--cyan)'}}>{u.tiktok}</div>
-                                    <div style={{display:'flex', gap:10, marginTop:10}}>
-                                        <button onClick={()=>{u.status=2; setUsers([...users]); alert("Approved")}} style={{flex:1, background: 'var(--cyan)', padding:8, border:'none', borderRadius:5}}>Approve</button>
-                                        <button onClick={()=>{u.status=3; setUsers([...users]); alert("Rejected")}} style={{flex:1, background: 'var(--red)', padding:8, border:'none', borderRadius:5}}>Reject</button>
+                            <div style={styles.card}><div style={{display:'flex', justifyContent:'space-between'}}><div><div style={{fontSize:'12px', color:'#666'}}>{currentUser.name} ({currentUser.email})</div><div style={{fontSize:'28px', fontWeight:'900', color:'#00f2ea'}}>{currentUser.balance} TWD</div></div><button style={styles.btnCyan} onClick={()=>alert("餘額不足")}>提現</button></div></div>
+                            <div style={styles.card}>
+                                <h3>帳號審核與綁定</h3>
+                                <div style={{padding:'15px', background:'#000', borderRadius:'10px', textAlign:'center', marginBottom:'15px', color: currentUser.status==='pending'?'#ffd700':currentUser.status==='approved'?'#00f2ea':'#ff0050'}}>{currentUser.status==='unbound'?'尚未綁定':currentUser.status==='pending'?t.statusPending : currentUser.status==='approved'?t.statusApproved : t.statusRejected}</div>
+                                {currentUser.status === 'unbound' && (
+                                    <div>
+                                        <input className="input-box" placeholder="輸入 TikTok 主頁連結" onChange={e=>setUserTikTok(e.target.value)} />
+                                        <button style={{width:'100%', background:'#fff', color:'#000', border:'none', padding:'12px', borderRadius:'10px', fontWeight:'bold'}} onClick={()=>{setPendingUsers(prev=>[{id:Date.now(), name:currentUser.name, phone:currentUser.phone, email:currentUser.email, tiktok:inputVal, status:'pending', time:'Now'}, ...prev]); setCurrentUser(p=>({...p, status:'pending'})); alert("提交成功");}}>提交綁定 TikTok</button>
                                     </div>
-                                </div>
-                            ))}
+                                )}
+                            </div>
+                            <button onClick={()=>setView("creator")} style={{width:'100%', background:'none', color:'#444', border:'1px solid #222', padding:'10px', borderRadius:'10px'}}>退出登錄</button>
+                        </div>
+                    ) : (
+                        <div style={{padding:'20px 5%'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={styles.btnCyan}>退出</button>
+                            <div style={styles.card}><p>待審核列表</p>{pendingUsers.map(u=>(<div key={u.id} style={{borderBottom:'1px solid #222', padding:'10px 0'}}><small>{u.name} | {u.phone} | {u.email}</small><br/><a href={u.tiktok} target="_blank" style={{color:'#00f2ea'}}>{u.tiktok}</a><br/><button style={styles.btnCyan} onClick={()=>{setCurrentUser(p=>({...p, status:'approved'})); alert("已通過");}}>准予通過</button></div>))}</div>
                         </div>
                     )}
 
                     {showModal && (
-                        <div className="modal-overlay" onClick={()=>setShowModal(false)}>
-                            <div className="modal-box" onClick={e=>e.stopPropagation()}>
-                                <h3 style={{color: 'var(--cyan)', marginBottom:20}}>{t.modals[modalType] || "Admin Login"}</h3>
-                                {modalType === "service" ? <img src={qrCodeUrl} style={{width:160, border: '2px solid var(--cyan)', borderRadius:10}} /> : (
-                                    <form onSubmit={handleAuth} style={{width:'100%'}}>
-                                        {modalType === "register" && (
-                                            <>
-                                                <input className="input-box" placeholder="Name" required onChange={e=>setRegForm({...regForm, name:e.target.value})} />
-                                                <input className="input-box" placeholder="Phone" required onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
-                                            </>
-                                        )}
-                                        <input className="input-box" placeholder="Email / Pass" required onChange={e=>setLoginForm({...loginForm, email:e.target.value})} />
-                                        <input className="input-box" type="password" placeholder="Password" required onChange={e=>setLoginForm({...loginForm, pass:e.target.value})} />
-                                        <button className="input-box" style={{background: 'var(--cyan)', color:'#000', fontWeight:'bold', border:'none', marginTop:10}}>Submit</button>
-                                        {modalType === "login" && <div onClick={()=>setModalType("register")} style={{fontSize:12, color:'#666', marginTop:15, cursor:'pointer', textAlign:'center'}}>No account? Register</div>}
-                                    </form>
+                        <div className="modal-overlay" onClick={() => setShowModal(false)}><div className="modal-content" onClick={e=>e.stopPropagation()}>
+                            <h3 style={{color:'#00f2ea', marginBottom:'15px'}}>{t.modals[modalType]}</h3>
+                            <form onSubmit={handleAuth}>
+                                {modalType === 'register' ? (
+                                    <>
+                                        <input required className="input-box" placeholder="姓名" onChange={e=>setRegForm({...regForm, name:e.target.value})} />
+                                        <input required className="input-box" placeholder="電話號碼" onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
+                                        <input required className="input-box" placeholder="Email" onChange={e=>setRegForm({...regForm, email:e.target.value})} />
+                                        <input required className="input-box" type="password" placeholder="密碼" onChange={e=>setRegForm({...regForm, pass:e.target.value})} />
+                                    </>
+                                ) : (
+                                    <>
+                                        <input required className="input-box" placeholder="Email / 手機號 (admin888)" onChange={e=>setLoginForm({...loginForm, email:e.target.value})} />
+                                        <input required className="input-box" type="password" placeholder="密碼" onChange={e=>setLoginForm({...loginForm, pass:e.target.value})} />
+                                    </>
                                 )}
-                                <button onClick={()=>setShowModal(false)} style={{background:'none', border:'none', color:'#444', marginTop:'auto', cursor:'pointer'}}>CLOSE</button>
-                            </div>
-                        </div>
+                                <button className="input-box" style={{background:'#00f2ea', color:'#000', fontWeight:'bold', border:'none'}}>{status==='processing'?'...':'提交'}</button>
+                                {modalType==='login' && <div onClick={()=>setModalType("register")} style={{fontSize:'12px', color:'#666', cursor:'pointer'}}>沒有帳號？立即註冊</div>}
+                            </form><button onClick={()=>setShowModal(false)} style={{background:'none', border:'none', color:'#444', marginTop:'10px'}}>關閉</button>
+                        </div></div>
                     )}
                 </div>
             );
