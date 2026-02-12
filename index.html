@@ -17,28 +17,24 @@
 
         function App() {
             const [view, setView] = useState("creator"); 
-            const [videoCount, setVideoCount] = useState(10); 
             const [lang, setLang] = useState("zh_tw");
+            const [videoCount, setVideoCount] = useState(10);
             
-            // 存儲用戶輸入資訊
-            const [userEmail, setUserEmail] = useState("");
-            
-            const [isLoggedIn, setIsLoggedIn] = useState(false); 
-            const [accountStatus, setAccountStatus] = useState("unbound"); 
-            const [userBalance, setUserBalance] = useState(0);
-            const [isRedCreator, setIsRedCreator] = useState(false);
+            // --- 核心數據狀態 ---
+            const [currentUser, setCurrentUser] = useState(null); // 當前登錄用戶物件
             const [qrCodeUrl, setQrCodeUrl] = useState("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAKERPRO_SERVICE");
-
-            // 後台審核列表
             const [pendingUsers, setPendingUsers] = useState([
-                { id: 999, info: "example@test.com", tiktok: "https://tiktok.com/@official", time: "2026-02-12" }
+                { id: 999, info: "example@test.com", tiktok: "https://tiktok.com/@official", status: "pending", time: "2026-02-12" }
             ]);
 
+            // --- 彈窗與表單控制 ---
             const [showModal, setShowModal] = useState(false);
-            const [modalType, setModalType] = useState("login"); 
+            const [modalType, setModalType] = useState("login"); // login, register, adminLogin, service
             const [inputVal, setInputVal] = useState("");
+            const [inputPass, setInputPass] = useState("");
             const [status, setStatus] = useState("idle");
 
+            // 長按 Logo 進入管理員模式
             const timerRef = useRef(null);
             const handleLogoTouchStart = () => {
                 timerRef.current = setTimeout(() => { setModalType("adminLogin"); setShowModal(true); }, 2000);
@@ -47,184 +43,165 @@
 
             const content = {
                 zh_tw: {
-                    nav: ["任務大廳", "收益等級", "加入創客"], hero: ["TikTok", "創客達人招募"],
-                    subtitle: "TikTok 創客加速計畫：只要發佈一條視頻就有 20 台幣！基礎/中/高播放獎金疊加。",
-                    calcTitle: "預估月收入收益模擬", calcLabel: "每日預計發佈視頻數", normal: "見習創客月收益", pro: "紅創客月收益",
-                    statusPending: "審核中", upgradeBtnTxt: "立即升級", successTxt: "操作成功", closeBtn: "關閉",
-                    logic1: { t1: ["基礎發佈獎勵", "20", ""], t2: ["中級流量獎", "40", ""], t3: ["爆款高播放獎", "100+", ""] },
-                    logic2: { title: "創客等級與特權體系", lv1: ["見習創客", "無門檻", "20 TWD/條", "5%", "基礎"], lv2: ["紅創客", "999 TWD", "30 TWD/條", "10%", "VIP"], lv3: ["導師級", "保證金", "300+", "15%", "管理"] },
+                    hero: ["TikTok", "創客達人招募"],
+                    subtitle: "只要發佈一條視頻就有 20 台幣！獎金疊加。",
+                    calcTitle: "預估月收入模擬", normal: "見習收益", pro: "紅創客收益",
+                    statusPending: "⏳ 待審核", statusApproved: "✅ 審核已通過", statusRejected: "❌ 駁回：請聯繫客服",
+                    withdrawBtn: "餘額提現", submitTask: "提交視頻連結", submitBtn: "提交審核",
                     modals: {
-                        login: { title: "創客登錄", desc: "輸入手機/Email註冊", placeholder: "手機 / Email", btn: "下一步" },
-                        bind: { title: "綁定 TikTok", desc: "請綁定主頁連結", placeholder: "TikTok Link", btn: "提交審核" },
-                        pending: { title: "審核中", desc: "賬號審核中，通過後開啟獎金" },
-                        task: { title: "提交任務", desc: "粘貼視頻連結", placeholder: "Link", btn: "領取獎金" },
-                        adminLogin: { title: "管理員登錄", desc: "請輸入管理密碼", placeholder: "Password", btn: "進入" },
-                        service: { title: "官方在線客服", desc: "掃描二維碼聯繫客服" }
+                        login: { title: "創客登錄", btn: "登錄" },
+                        register: { title: "新創客註冊", btn: "註冊並前往登錄" },
+                        adminLogin: { title: "管理員模式", btn: "進入" }
                     }
-                },
-                zh_cn: {
-                    nav: ["任务大厅", "收益等级", "加入创客"], hero: ["TikTok", "创客达人招募"],
-                    subtitle: "TikTok 创客加速计划：只要发布一条视频就有 20 台币！基础/中/高播放奖金叠加。",
-                    calcTitle: "预估月收入收益模拟", calcLabel: "每日预计发布视频数", normal: "见习创客月收益", pro: "红创客月收益",
-                    statusPending: "审核中", upgradeBtnTxt: "立即升级", successTxt: "操作成功", closeBtn: "关闭",
-                    logic1: { t1: ["基础发布奖励", "20", ""], t2: ["中级流量奖", "40", ""], t3: ["爆款高播放奖", "100+", ""] },
-                    logic2: { title: "创客等级与特权体系", lv1: ["见习创客", "", "20/条", "5%", ""], lv2: ["红创客", "", "30/条", "10%", ""], lv3: ["导师级", "", "300+", "15%", ""] },
-                    modals: { login: { title: "登录", desc: "手机/Email注册", placeholder: "Phone/Email", btn: "下一步" }, bind: { title: "绑定", desc: "绑定主页链接", placeholder: "Link", btn: "提交" }, pending: { title: "审核中", desc: "账号审核中" }, task: { title: "提交任务", btn: "领奖" }, adminLogin: { title: "管理员", btn: "进入" }, service: { title: "客服", desc: "扫码联系" } }
-                },
-                en: {
-                    nav: ["Tasks", "Rewards", "Join"], hero: ["TikTok", "Recruitment"],
-                    subtitle: "TikTok Program: 20 TWD per video! Extra bonuses included.",
-                    calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee", pro: "Red Creator",
-                    statusPending: "Pending", upgradeBtnTxt: "Upgrade", successTxt: "Success", closeBtn: "Close",
-                    logic1: { t1: ["Basic", "20", ""], t2: ["Mid", "40", ""], t3: ["Viral", "100+", ""] },
-                    logic2: { title: "Levels", lv1: ["Trainee", "", "20/p", "5%", ""], lv2: ["Red", "", "30/p", "10%", ""], lv3: ["Mentor", "", "300+", "15%", ""] },
-                    modals: { login: { title: "Login", btn: "Next" }, bind: { title: "Bind", btn: "Submit" }, pending: { title: "Pending", desc: "Reviewing..." }, task: { title: "Task", btn: "Claim" }, adminLogin: { title: "Admin", btn: "Login" }, service: { title: "Support", desc: "Scan QR" } }
                 }
             };
+            const t = content["zh_tw"];
 
-            const t = content[lang] || content["zh_tw"];
-
-            const handleAction = () => {
-                if (!isLoggedIn) { setModalType("login"); setShowModal(true); }
-                else if (accountStatus === "unbound") { setModalType("bind"); setShowModal(true); }
-                else if (accountStatus === "pending") { setModalType("pending"); setShowModal(true); }
-                else { setModalType("task"); setShowModal(true); }
-            };
-
-            const executeLogic = (e) => {
+            // --- 核心邏輯執行 ---
+            const handleLogic = (e) => {
                 e.preventDefault();
                 setStatus("processing");
                 setTimeout(() => {
-                    if (modalType === "login") { 
-                        setIsLoggedIn(true); setUserEmail(inputVal); setModalType("bind"); 
-                    } else if (modalType === "bind") { 
-                        setAccountStatus("pending");
-                        const newUser = { id: Date.now(), info: userEmail || "New User", tiktok: inputVal, time: new Date().toLocaleDateString() };
-                        setPendingUsers(prev => [newUser, ...prev]);
-                        setModalType("pending"); 
+                    if (modalType === "register") {
+                        alert("註冊成功！請登錄。");
+                        setModalType("login");
+                    } else if (modalType === "login") {
+                        setCurrentUser({ email: inputVal, balance: 0, status: "pending", tiktok: "未綁定" });
+                        setView("userDash");
+                        setShowModal(false);
                     } else if (modalType === "adminLogin") {
                         if (inputVal === "admin888") { setView("admin"); setShowModal(false); }
-                        else { alert(lang === 'en' ? "Wrong Password" : "密碼錯誤"); }
-                    } else if (modalType === "task") {
-                        setUserBalance(prev => prev + (isRedCreator ? 30 : 20));
-                        setStatus("success");
-                        setTimeout(() => { setShowModal(false); setStatus("idle"); }, 1500);
+                        else { alert("密碼錯誤"); }
                     }
-                    setStatus("idle"); setInputVal("");
+                    setStatus("idle"); setInputVal(""); setInputPass("");
                 }, 1000);
             };
 
             const styles = {
-                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif', paddingBottom: '110px' },
+                container: { backgroundColor: '#050505', color: 'white', minHeight: '100vh', fontFamily: 'Inter, sans-serif' },
                 navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '15px 4%', borderBottom: '1px solid #111', background: '#050505', position: 'sticky', top: 0, zIndex: 100 },
-                logo: { fontSize: '20px', fontWeight: '900', cursor: 'pointer', userSelect: 'none' },
-                langSwitch: { display: 'flex', gap: '8px' },
-                langItem: { fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' },
-                hero: { textAlign: 'center', padding: '80px 20px 40px' },
-                heroTitle: { fontSize: 'clamp(34px, 8vw, 70px)', fontWeight: '900', lineHeight: 1.1 },
-                gradientText: { background: 'linear-gradient(90deg, #00f2ea, #fff, #ff0050)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' },
-                heroSubtitle: { color: '#666', maxWidth: '500px', margin: '15px auto', fontSize: '14px', lineHeight: 1.5 },
-                section: { maxWidth: '1000px', margin: '0 auto', padding: '0 20px' },
-                horizontalGrid: { display: 'flex', gap: '15px', justifyContent: 'center', flexWrap: 'nowrap' },
-                calcContainer: { background: 'rgba(255,255,255,0.01)', border: '1px solid #111', padding: '30px', borderRadius: '30px' },
-                calcRes: { flex: 1, padding: '20px', borderRadius: '12px', background: 'rgba(255,255,255,0.01)', textAlign:'center' },
-                memberGrid: { display: 'flex', gap: '15px', flexWrap: 'wrap' },
-                memberCard: { flex: 1, padding: '25px', background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', textAlign: 'center', minWidth: '260px' },
-                lvPoint: { fontSize: '12px', color: '#777', margin: '8px 0', textAlign: 'left', paddingLeft: '10%' },
-                upgradeBtn: { background: 'linear-gradient(90deg, #ff0050, #00f2ea)', border: 'none', color: '#fff', width:'100%', padding:'10px', borderRadius:'10px', marginTop:'15px', fontWeight:'bold', cursor: 'pointer' },
-                modalInput: { width: '100%', background: '#000', border: '1px solid #333', padding: '15px', borderRadius: '12px', color: '#fff', marginBottom: '20px', outline: 'none', boxSizing: 'border-box' },
-                modalBtn: { width: '100%', background: '#fff', color: '#000', border: 'none', padding: '15px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' },
-                cancelBtn: { background: 'none', color: '#444', border: 'none', width: '100%', marginTop: '10px', cursor: 'pointer', fontSize: '12px' },
-                walletBox: { background:'rgba(0,242,234,0.1)', padding:'4px 10px', borderRadius:'10px', fontSize:'12px', color:'#00f2ea' }
+                logo: { fontSize: '20px', fontWeight: '900', cursor: 'pointer' },
+                card: { background: '#0a0a0a', border: '1px solid #1a1a1a', borderRadius: '20px', padding: '25px', marginBottom: '15px' },
+                btnMain: { width: '100%', background: '#fff', color: '#000', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' },
+                btnCyan: { background: '#00f2ea', color: '#000', border: 'none', padding: '8px 15px', borderRadius: '8px', fontWeight: 'bold' },
+                bottomBar: { position: 'fixed', bottom: 0, left: 0, right: 0, background: 'linear-gradient(to top, #000, transparent)', padding: '15px 5%', zIndex: 200 }
             };
 
             return (
                 <div style={styles.container}>
                     <style>{`
-                        @media (max-width: 600px) { 
-                            .hero-title { font-size: 50px !important; } 
-                            .navbar-mobile-logo { font-size: 25px !important; }
-                            .lang-switch-mobile { transform: scale(1.5); transform-origin: right; }
-                            .horizontal-grid { gap: 8px !important; } 
-                            .square-card h3 { font-size: 11px !important; } .square-card .price-val { font-size: 22px !important; }
-                        }
-                        .square-card { aspect-ratio: 1/1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; transition: 0.3s; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); min-width: 0; flex: 1; cursor: pointer;}
-                        .square-card:hover { border-color: #00f2ea; transform: translateY(-3px); background: rgba(0,242,234,0.05); }
-                        .bottom-nav-bar { position: fixed; bottom: 0; left: 0; right: 0; padding: 20px 5%; background: linear-gradient(to top, #000 80%, transparent); z-index: 200; display: flex; justify-content: center; }
-                        .join-btn-bottom { 
-                            width: 100%; max-width: 500px; background: #111; border: 1.5px solid #00f2ea; color: #00f2ea; padding: 16px; border-radius: 50px; font-weight: 900; font-size: 15px; letter-spacing: 3px; cursor: pointer; transition: 0.4s; box-shadow: 0 0 20px rgba(0, 242, 234, 0.15); text-transform: uppercase;
-                        }
-                        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.92); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-                        .modal-content { background: #111; border: 1px solid #222; padding: 20px; border-radius: 24px; width: 300px; height: 300px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-sizing: border-box; overflow: hidden; }
-                        .admin-card { background: #111; border: 1px solid #222; border-radius: 15px; padding: 15px; margin-bottom: 15px; text-align: left; }
+                        @media (max-width: 600px) { .hero-title { font-size: 50px !important; } .nav-logo { font-size: 25px !important; } }
+                        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+                        .modal-content { background: #111; border: 1px solid #222; padding: 25px; border-radius: 24px; width: 300px; text-align:center; }
+                        .input-box { width: 100%; background: #000; border: 1px solid #333; padding: 12px; border-radius: 10px; color: #fff; margin-bottom: 10px; box-sizing: border-box; }
                     `}</style>
 
+                    {/* --- 1. 導航欄 --- */}
+                    <nav style={styles.navbar}>
+                        <div className="nav-logo" style={styles.logo} onMouseDown={handleLogoTouchStart} onTouchStart={handleLogoTouchStart} onMouseUp={handleLogoTouchEnd} onTouchEnd={handleLogoTouchEnd}>
+                            MAKER<span style={{color:'#00f2ea'}}>PRO</span>
+                        </div>
+                        {currentUser ? <div style={{fontSize:'12px', color:'#00f2ea'}}>{currentUser.email}</div> : 
+                        <div onClick={()=>{setModalType("login"); setShowModal(true)}} style={{fontSize:'12px', cursor:'pointer'}}>登錄/註冊</div>}
+                    </nav>
+
+                    {/* --- 2. 視圖切換 --- */}
                     {view === "creator" ? (
-                        <>
-                            <nav style={styles.navbar}>
-                                <div className="navbar-mobile-logo" style={styles.logo} onMouseDown={handleLogoTouchStart} onMouseUp={handleLogoTouchEnd} onTouchStart={handleLogoTouchStart} onTouchEnd={handleLogoTouchEnd}>MAKER<span style={{color:'#00f2ea'}}>PRO</span></div>
-                                <div style={{display:'flex', gap:'12px', alignItems:'center'}}>
-                                    {isLoggedIn && <div style={styles.walletBox}>TWD: {userBalance}</div>}
-                                    <div className="lang-switch-mobile" style={styles.langSwitch}>
-                                        <span onClick={()=>setLang('zh_tw')} style={{...styles.langItem, color: lang==='zh_tw'?'#00f2ea':'#555'}}>繁</span>
-                                        <span onClick={()=>setLang('zh_cn')} style={{...styles.langItem, color: lang==='zh_cn'?'#00f2ea':'#555'}}>简</span>
-                                        <span onClick={()=>setLang('en')} style={{...styles.langItem, color: lang==='en'?'#00f2ea':'#555'}}>EN</span>
+                        <div style={{paddingBottom:'100px'}}>
+                            <header style={{textAlign:'center', padding:'60px 20px 30px'}}>
+                                <h1 className="hero-title" style={{fontSize:'70px', fontWeight:'900', margin:0}}>{t.hero[0]}<br/><span style={{background:'linear-gradient(90deg, #00f2ea, #fff, #ff0050)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent'}}>{t.hero[1]}</span></h1>
+                                <p style={{color:'#666', fontSize:'14px', marginTop:'15px'}}>{t.subtitle}</p>
+                            </header>
+                            <section style={{maxWidth:'1000px', margin:'0 auto', padding:'0 20px'}}>
+                                <div style={{display:'flex', gap:'10px', flexWrap:'nowrap'}}>
+                                    {[[ "基礎", "20" ], [ "流量", "40" ], [ "爆款", "100+" ]].map((it, i) => (
+                                        <div key={i} style={{flex:1, textAlign:'center', background:'rgba(255,255,255,0.03)', border:'1px solid #1a1a1a', borderRadius:'15px', padding:'15px'}}>
+                                            <div style={{fontSize:'10px', color:'#00f2ea'}}>STEP 0{i+1}</div>
+                                            <div style={{fontSize:'12px', margin:'5px 0'}}>{it[0]}</div>
+                                            <div style={{fontSize:'24px', fontWeight:'900'}}>{it[1]}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                            <div className={styles.bottomBar} style={styles.bottomBar}>
+                                <button style={{width:'100%', maxWidth:'500px', background:'#111', border:'1.5px solid #00f2ea', color:'#00f2ea', padding:'16px', borderRadius:'50px', fontWeight:'900', cursor:'pointer'}} onClick={()=>setView(currentUser?"userDash":"creator")}>
+                                    {currentUser ? "進入個人中心" : "立即加入創客計畫"}
+                                </button>
+                            </div>
+                        </div>
+                    ) : view === "userDash" ? (
+                        /* --- 3. 用戶端頁面 --- */
+                        <div style={{padding:'20px 5%'}}>
+                            <div style={styles.card}>
+                                <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+                                    <div>
+                                        <div style={{fontSize:'12px', color:'#666'}}>當前餘額</div>
+                                        <div style={{fontSize:'28px', fontWeight:'900', color:'#00f2ea'}}>{currentUser.balance} <span style={{fontSize:'14px'}}>TWD</span></div>
+                                    </div>
+                                    <button style={styles.btnCyan} onClick={()=>alert("餘額不足 500 TWD，無法提現")}>{t.withdrawBtn}</button>
+                                </div>
+                            </div>
+
+                            <div style={styles.card}>
+                                <h3 style={{marginTop:0, fontSize:'16px'}}> TikTok 賬號狀態</h3>
+                                <div style={{padding:'15px', borderRadius:'12px', background:'#000', border:'1px solid #222', textAlign:'center', margin:'15px 0'}}>
+                                    <div style={{fontSize:'18px', fontWeight:'bold', color: currentUser.status==='pending'?'#ffd700':currentUser.status==='approved'?'#00f2ea':'#ff0050'}}>
+                                        {currentUser.status==='pending'?t.statusPending : currentUser.status==='approved'?t.statusApproved : t.statusRejected}
                                     </div>
                                 </div>
-                            </nav>
-                            <header style={styles.hero}><h1 className="hero-title" style={styles.heroTitle}>{t.hero[0]}<br /><span style={styles.gradientText}>{t.hero[1]}</span></h1><p className="hero-subtitle" style={styles.heroSubtitle}>{t.subtitle}</p></header>
-                            <section style={styles.section}><div className="horizontal-grid" style={styles.horizontalGrid}>{[t.logic1.t1, t.logic1.t2, t.logic1.t3].map((item, i) => (<div key={i} className="square-card" onClick={handleAction} style={{borderRadius: '14px', padding: '10px'}}><div style={{fontSize: '8px', color: '#00f2ea'}}>STEP 0{i+1}</div><h3 style={{fontSize: '12px'}}>{item[0]}</h3><div className="price-val" style={{fontSize: '24px', fontWeight: '900'}}>{item[1]}</div><div style={{fontSize: '10px', color:'#666'}}>TWD</div></div>))}</div></section>
-                            <section style={{...styles.section, margin:'40px auto'}}><div style={styles.calcContainer}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize: '20px'}}>{t.calcTitle}</h2><input type="range" min="1" max="20" value={videoCount} onChange={(e)=>setVideoCount(e.target.value)} style={{width:'100%', accentColor:'#00f2ea'}} /><div style={{display:'flex', gap:'15px', marginTop:'20px'}}><div style={styles.calcRes}><div>{t.normal}</div><strong>{videoCount * 2000} TWD</strong></div><div style={{...styles.calcRes, border: '1px solid #00f2ea'}}><div style={{color:'#00f2ea'}}>{t.pro}</div><strong style={{color:'#00f2ea'}}>{videoCount * 4800} TWD+</strong></div></div></div></section>
-                            <section style={styles.section}><h2 style={{textAlign:'center', marginBottom:'30px', fontSize: '20px'}}>{t.logic2.title}</h2><div style={styles.memberGrid}>{[t.logic2.lv1, t.logic2.lv2, t.logic2.lv3].map((lv, i) => (<div key={i} style={{...styles.memberCard, border: i===1?'1px solid #00f2ea':'1px solid #1a1a1a'}}><h3 style={{color: i===1?'#00f2ea':i===2?'#ff0050':'#fff', fontSize: '18px'}}>{lv[0]}</h3><div style={styles.lvPoint}>✓ {lv[2]}</div><div style={styles.lvPoint}>✓ {lv[3]}</div><div style={styles.lvPoint}>✓ {lv[4]}</div>{i === 1 && <button onClick={()=>{if(!isLoggedIn) handleAction(); else setIsRedCreator(true)}} style={styles.upgradeBtn}>{isRedCreator ? 'ACTIVE' : t.upgradeBtnTxt}</button>}</div>))}</div></section>
-                            <div style={{position:'fixed', bottom:'110px', right:'20px', width:'60px', height:'60px', borderRadius:'50%', background:'linear-gradient(135deg, #00f2ea, #ff0050)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer'}} onClick={()=>{setModalType("service"); setShowModal(true);}}>💬</div>
-                            <div className="bottom-nav-bar"><button className="join-btn-bottom" onClick={handleAction}>{isLoggedIn ? (accountStatus==='pending' ? t.statusPending : t.nav[2]) : t.nav[2]}</button></div>
-                        </>
+                                
+                                {currentUser.status === 'approved' ? (
+                                    <div>
+                                        <label style={{fontSize:'12px', color:'#666'}}>{t.submitTask}</label>
+                                        <input className="input-box" placeholder="https://v.tiktok.com/..." style={{marginTop:'8px'}} />
+                                        <button style={styles.btnMain} onClick={()=>alert("任務提交成功，等待人工審核播放量")}>{t.submitBtn}</button>
+                                    </div>
+                                ) : currentUser.status === 'rejected' ? (
+                                    <button style={styles.btnMain} onClick={()=>{setModalType("service"); setShowModal(true)}}>聯繫官方客服解封</button>
+                                ) : null}
+                            </div>
+                            <button onClick={()=>setView("creator")} style={{background:'none', border:'1px solid #333', color:'#666', width:'100%', padding:'10px', borderRadius:'10px'}}>返回首頁</button>
+                        </div>
                     ) : (
-                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}>
-                           <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'30px'}}><h2>指揮部 (管理後台)</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出後台</button></div>
-                           <div className="admin-card">
-                               <p>換客服二維碼 URL:</p>
-                               <input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.modalInput} />
-                               <img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} />
-                           </div>
-                           <div className="admin-card">
-                               <p>創客審核列表 (實時更新):</p>
-                               {pendingUsers.length === 0 ? <p style={{color:'#444'}}>暫無申請</p> : pendingUsers.map(u => (
-                                   <div key={u.id} style={{padding:'15px', background:'#000', borderBottom:'1px solid #222', borderRadius:'10px', marginBottom:'10px'}}>
-                                       <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.info}</div>
-                                       <a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#fff', textDecoration:'underline'}}>{u.tiktok}</a><br/>
-                                       <div style={{textAlign:'right', marginTop:'10px'}}>
-                                           <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>setPendingUsers(prev=>prev.filter(x=>x.id!==u.id))}>核准通過</button>
-                                       </div>
-                                   </div>
-                               ))}
-                           </div>
+                        /* --- 4. 管理員後台 --- */
+                        <div style={{padding:'20px 5%'}}>
+                            <div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")}>退出</button></div>
+                            <div style={styles.card}>
+                                <p>創客審核列表</p>
+                                {pendingUsers.map(u => (
+                                    <div key={u.id} style={{padding:'10px', borderBottom:'1px solid #222'}}>
+                                        <div>{u.info}</div>
+                                        <div style={{fontSize:'10px', color:'#00f2ea'}}>{u.tiktok}</div>
+                                        <button style={styles.btnCyan} onClick={()=>{alert("已通過"); setView("creator"); setCurrentUser(prev=>({...prev, status:'approved'}))}}>准予通過</button>
+                                        <button style={{...styles.btnCyan, background:'#ff0050', marginLeft:'10px'}} onClick={()=>{alert("已駁回"); setCurrentUser(prev=>({...prev, status:'rejected'}))}}>駁回</button>
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 
+                    {/* --- 5. 彈窗系統 --- */}
                     {showModal && (
                         <div className="modal-overlay" onClick={() => setShowModal(false)}>
                             <div className="modal-content" onClick={e => e.stopPropagation()}>
-                                <h3 style={{marginBottom:'10px', fontSize:'18px', color:'#00f2ea'}}>{t.modals[modalType]?.title}</h3>
-                                {modalType === "service" ? (<img src={qrCodeUrl} alt="QR" style={{width:'120px', borderRadius:'10px', border:'2px solid #00f2ea'}} />) : 
-                                 status === 'success' ? (<div style={{color:'#00f2ea', padding:'10px', fontWeight:'bold'}}>✔ SUCCESS</div>) : (
-                                    <form onSubmit={executeLogic} style={{width:'100%'}}>
-                                        {modalType === "pending" ? <p style={{color:'#888', fontSize:'13px'}}>{t.modals.pending.desc}</p> : (
-                                            <>
-                                                <input required value={inputVal} onChange={e=>setInputVal(e.target.value)} type={modalType==="adminLogin"?"password":"text"} placeholder={t.modals[modalType]?.placeholder} style={{...styles.modalInput, padding:'12px', fontSize:'14px'}} />
-                                                <button type="submit" style={{...styles.modalBtn, padding:'12px'}}>{status === 'processing' ? "..." : t.modals[modalType]?.btn}</button>
-                                            </>
-                                        )}
+                                <h2 style={{color:'#00f2ea', fontSize:'20px', marginBottom:'15px'}}>{t.modals[modalType]?.title}</h2>
+                                {modalType === 'service' ? (
+                                    <img src={qrCodeUrl} style={{width:'150px', borderRadius:'10px', border:'2px solid #00f2ea'}} />
+                                ) : (
+                                    <form onSubmit={handleLogic}>
+                                        <input required className="input-box" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder="Email / 手機號" />
+                                        <input required className="input-box" type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="密碼" />
+                                        <button className="input-box" style={{background:'#00f2ea', color:'#000', fontWeight:'bold', border:'none'}}>{status==='processing'?'...':t.modals[modalType]?.btn}</button>
+                                        {modalType === 'login' && <div onClick={()=>setModalType("register")} style={{fontSize:'12px', color:'#666', cursor:'pointer', marginTop:'10px'}}>沒有賬號？立即註冊</div>}
                                     </form>
                                 )}
-                                <button type="button" onClick={()=>setShowModal(false)} style={{background:'none', border:'none', color:'#444', marginTop:'10px', cursor:'pointer'}}>{t.closeBtn}</button>
+                                <button onClick={()=>setShowModal(false)} style={{background:'none', border:'none', color:'#444', marginTop:'10px'}}>關閉</button>
                             </div>
                         </div>
                     )}
                 </div>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
