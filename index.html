@@ -21,8 +21,10 @@
             const [videoCount, setVideoCount] = useState(10);
             const [currentUser, setCurrentUser] = useState(null); 
             const [qrCodeUrl, setQrCodeUrl] = useState("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAKERPRO_SERVICE");
+            
+            // --- 核心數據列表 (已優化邏輯) ---
             const [pendingUsers, setPendingUsers] = useState([
-                { id: 999, info: "tw_pro@maker.com", tiktok: "https://tiktok.com/@tw_top", status: "pending", time: "2026-02-13" }
+                { id: 999, name: "系統測試", phone: "0900000000", info: "tw_pro@maker.com", tiktok: "https://tiktok.com/@tw_top", status: "pending", time: "2026-02-13" }
             ]);
 
             const [showModal, setShowModal] = useState(false);
@@ -91,7 +93,18 @@
                 setStatus("processing");
                 setTimeout(() => {
                     if (modalType === "register") {
-                        alert("註冊成功！請登錄。");
+                        // --- 核心打通邏輯：註冊時將數據推送到列表 ---
+                        const newUser = {
+                            id: Date.now(),
+                            name: regForm.name,
+                            phone: regForm.phone,
+                            info: regForm.email,
+                            tiktok: "尚未綁定",
+                            status: "pending",
+                            time: new Date().toLocaleDateString()
+                        };
+                        setPendingUsers(prev => [newUser, ...prev]);
+                        alert("註冊成功！數據已送至指揮部，請登錄。");
                         setModalType("login");
                     } else if (modalType === "login") {
                         setCurrentUser({ email: inputVal, balance: 120, status: "pending", tiktok: "" });
@@ -162,9 +175,10 @@
                             <button onClick={()=>setView("creator")} style={{background:'none', border:'1px solid #333', color:'#666', width:'100%', padding:'10px', borderRadius:'12px', cursor:'pointer'}}>返回首頁</button>
                         </div>
                     ) : (
-                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div><div style={styles.card}><p>更換客服二維碼:</p><input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.inputBox} /><img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} /></div><div style={styles.card}><p>待審核列表:</p>{pendingUsers.map(u => (
+                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div><div style={styles.card}><p>更換客服二維碼:</p><input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.inputBox} /><img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} /></div><div style={styles.card}><p>創客審核列表 (實時更新):</p>{pendingUsers.map(u => (
                             <div key={u.id} style={{padding:'15px', background:'#000', borderBottom:'1px solid #222', borderRadius:'10px', marginBottom:'10px'}}>
-                                <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.info}</div>
+                                <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.name || "新用戶"} | {u.phone || "無號碼"}</div>
+                                <div style={{fontSize:'12px', color:'#888'}}>{u.info}</div>
                                 <a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#fff', textDecoration:'underline'}}>{u.tiktok}</a><br/>
                                 <div style={{textAlign:'right', marginTop:'10px'}}>
                                     <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>{setCurrentUser(prev=>({...prev, status:'approved'})); alert("已核准");}}>核准通過</button>
@@ -179,12 +193,12 @@
                         <form onSubmit={handleAuth} style={{width:'100%'}}>
                             {modalType === 'register' && (
                                 <>
-                                    <input required className="input-box" placeholder="姓名" onChange={e=>setRegForm({...regForm, name:e.target.value})} />
-                                    <input required className="input-box" placeholder="電話號碼" onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
+                                    <input required className="input-box" placeholder="姓名" value={regForm.name} onChange={e=>setRegForm({...regForm, name:e.target.value})} />
+                                    <input required className="input-box" placeholder="電話號碼" value={regForm.phone} onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
                                 </>
                             )}
-                            <input required className="input-box" value={inputVal} onChange={e=>setInputVal(e.target.value)} placeholder={modalType==='adminLogin'?"管理帳號":"Email"} />
-                            <input required className="input-box" type="password" value={inputPass} onChange={e=>setInputPass(e.target.value)} placeholder="密碼" />
+                            <input required className="input-box" value={modalType==='register'?regForm.email:inputVal} onChange={e=>modalType==='register'?setRegForm({...regForm, email:e.target.value}):setInputVal(e.target.value)} placeholder={modalType==='adminLogin'?"管理帳號":"Email"} />
+                            <input required className="input-box" type="password" value={modalType==='register'?regForm.pass:inputPass} onChange={e=>modalType==='register'?setRegForm({...regForm, pass:e.target.value}):setInputPass(e.target.value)} placeholder="密碼" />
                             <button className="input-box" style={{background:'#00f2ea', color:'#000', fontWeight:'bold', border:'none', cursor:'pointer'}}>{status==='processing'?'...':t.modals[modalType]?.btn}</button>
                             {modalType==='login' && <div onClick={()=>setModalType("register")} style={{fontSize:'12px', color:'#666', cursor:'pointer', marginTop:'10px'}}>沒有帳號？立即註冊</div>}
                         </form>)}<button onClick={()=>setShowModal(false)} style={{background:'none', border:'none', color:'#444', marginTop:'10px', cursor:'pointer'}}>{t.closeBtn}</button></div></div>
