@@ -22,9 +22,9 @@
             const [currentUser, setCurrentUser] = useState(null); 
             const [qrCodeUrl, setQrCodeUrl] = useState("https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=MAKERPRO_SERVICE");
             
-            // --- 核心數據列表 (已優化邏輯) ---
+            // --- 管理員數據庫 (已打通綁定邏輯) ---
             const [pendingUsers, setPendingUsers] = useState([
-                { id: 999, name: "系統測試", phone: "0900000000", info: "tw_pro@maker.com", tiktok: "https://tiktok.com/@tw_top", status: "pending", time: "2026-02-13" }
+                { id: 999, name: "範例用戶", phone: "0912", info: "test@maker.com", tiktok: "https://tiktok.com/@sample", status: "pending" }
             ]);
 
             const [showModal, setShowModal] = useState(false);
@@ -36,12 +36,7 @@
 
             const timerRef = useRef(null);
             const handleLogoTouchStart = () => {
-                timerRef.current = setTimeout(() => { 
-                    setModalType("adminLogin"); 
-                    setInputVal(""); 
-                    setInputPass(""); 
-                    setShowModal(true); 
-                }, 2000);
+                timerRef.current = setTimeout(() => { setModalType("adminLogin"); setShowModal(true); }, 2000);
             };
             const handleLogoTouchEnd = () => clearTimeout(timerRef.current);
 
@@ -62,7 +57,7 @@
                 zh_cn: {
                     nav: ["任务", "等级", "加入"], hero: ["TikTok", "创客达人招募"],
                     subtitle: "TikTok 创客加速计划：只要发布一条视频就有 20 台币！基础/中/高播放奖金叠加。",
-                    calcTitle: "预估月收入收益模拟", calcLabel: "每日预计发布视频数", normal: "见习收益", pro: "红创客收益",
+                    calcTitle: "预估月收入收益模拟", normal: "见习收益", pro: "红创客收益",
                     rankTitle: "创客等级与特权体系",
                     lv1: ["见习创客", "无门槛", "20 TWD/条", "5% 提成", "基础结算"], 
                     lv2: ["红创客", "999 TWD", "30 TWD/条", "10% 提成", "专属素材"], 
@@ -75,7 +70,7 @@
                 en: {
                     nav: ["Tasks", "Rank", "Join"], hero: ["TikTok", "Recruitment"],
                     subtitle: "Earn 20 TWD per video! High view bonuses included.",
-                    calcTitle: "Income Simulator", calcLabel: "Daily Posts", normal: "Trainee", pro: "Red Creator",
+                    calcTitle: "Income Simulator", normal: "Trainee", pro: "Red Creator",
                     rankTitle: "Creator Privilege Levels",
                     lv1: ["Trainee", "Zero Fee", "20/post", "5% Comm", "Basic"], 
                     lv2: ["Red Creator", "999 TWD", "30/post", "10% Comm", "VIP Material"], 
@@ -93,30 +88,37 @@
                 setStatus("processing");
                 setTimeout(() => {
                     if (modalType === "register") {
-                        // --- 核心打通邏輯：註冊時將數據推送到列表 ---
-                        const newUser = {
-                            id: Date.now(),
-                            name: regForm.name,
-                            phone: regForm.phone,
-                            info: regForm.email,
-                            tiktok: "尚未綁定",
-                            status: "pending",
-                            time: new Date().toLocaleDateString()
-                        };
-                        setPendingUsers(prev => [newUser, ...prev]);
-                        alert("註冊成功！數據已送至指揮部，請登錄。");
+                        alert("註冊成功！請登錄。");
                         setModalType("login");
                     } else if (modalType === "login") {
-                        setCurrentUser({ email: inputVal, balance: 120, status: "pending", tiktok: "" });
+                        setCurrentUser({ ...regForm, email: inputVal, balance: 120, status: "unbound", tiktok: "" });
                         setView("userDash"); setShowModal(false);
                     } else if (modalType === "adminLogin") {
-                        if (inputPass === "admin888") { 
-                            setView("admin"); 
-                            setShowModal(false); 
-                        } else { alert("管理密碼錯誤！"); }
+                        if (inputPass === "admin888") { setView("admin"); setShowModal(false); }
+                        else { alert("密碼錯誤"); }
                     }
-                    setStatus("idle"); setInputVal(""); setInputPass("");
+                    setStatus("idle");
                 }, 500);
+            };
+
+            // --- 綁定 TikTok 並推送到後台 ---
+            const handleBindTikTok = () => {
+                if (!inputVal) return alert("請輸入正確連結");
+                const updatedUser = { ...currentUser, tiktok: inputVal, status: "pending" };
+                setCurrentUser(updatedUser);
+                
+                // 推送到管理員列表
+                const newRecord = {
+                    id: Date.now(),
+                    name: currentUser.name || "未填",
+                    phone: currentUser.phone || "未填",
+                    info: currentUser.email,
+                    tiktok: inputVal,
+                    status: "pending"
+                };
+                setPendingUsers(prev => [newRecord, ...prev]);
+                alert("已提交審核，請等待後台處理");
+                setInputVal("");
             };
 
             const styles = {
@@ -169,19 +171,20 @@
                     ) : view === "userDash" ? (
                         <div style={{padding:'20px 5%'}}>
                             <div style={styles.card}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><div><div style={{fontSize:'12px', color:'#666'}}>{currentUser.email}</div><div style={{fontSize:'28px', fontWeight:'900', color:'#00f2ea'}}>{currentUser.balance} <span style={{fontSize:'14px'}}>TWD</span></div></div><button style={styles.btnCyan} onClick={()=>alert("餘額不足，最低提現 500 TWD")}>{t.withdrawBtn}</button></div></div>
-                            <div style={styles.card}><h3 style={{marginTop:0, fontSize:'16px'}}> TikTok 賬號狀態</h3><div style={{padding:'20px', borderRadius:'15px', background:'#000', border:'1px solid #222', textAlign:'center', margin:'15px 0'}}><div style={{fontSize:'20px', fontWeight:'bold', color: currentUser.status==='pending'?'#ffd700':currentUser.status==='approved'?'#00f2ea':'#ff0050'}}>{currentUser.status==='pending'?t.statusPending : currentUser.status==='approved'?t.statusApproved : t.statusRejected}</div></div>
-                            {currentUser.status === 'pending' && (<div><label style={{fontSize:'12px', color:'#666'}}>{t.bindTikTok}</label><input className="input-box" placeholder="https://v.tiktok.com/@yourname" onChange={e=>setInputVal(e.target.value)} /><button style={{width:'100%', background:'#fff', color:'#000', border:'none', padding:'12px', borderRadius:'10px', fontWeight:'bold'}} onClick={()=>{setPendingUsers(prev=>[{id:Date.now(), info:currentUser.email, tiktok:inputVal, status:'pending', time:'Now'}, ...prev]); alert("綁定成功，請等待審核");}}>提交綁定</button></div>)}
+                            <div style={styles.card}><h3 style={{marginTop:0, fontSize:'16px'}}> TikTok 賬號狀態</h3><div style={{padding:'20px', borderRadius:'15px', background:'#000', border:'1px solid #222', textAlign:'center', margin:'15px 0'}}><div style={{fontSize:'20px', fontWeight:'bold', color: currentUser.status==='unbound'?'#666':currentUser.status==='pending'?'#ffd700':currentUser.status==='approved'?'#00f2ea':'#ff0050'}}>{currentUser.status==='unbound'?'尚未綁定':currentUser.status==='pending'?t.statusPending : currentUser.status==='approved'?t.statusApproved : t.statusRejected}</div></div>
+                            {currentUser.status === 'unbound' && (<div><label style={{fontSize:'12px', color:'#666'}}>{t.bindTikTok}</label><input className="input-box" placeholder="https://v.tiktok.com/@yourname" onChange={e=>setInputVal(e.target.value)} /><button style={{width:'100%', background:'#fff', color:'#000', border:'none', padding:'12px', borderRadius:'10px', fontWeight:'bold'}} onClick={handleBindTikTok}>提交綁定</button></div>)}
+                            {currentUser.status === 'pending' && <p style={{textAlign:'center', fontSize:'12px', color:'#666'}}>請等待管理員核准，審核通過後即可開始任務</p>}
                             {currentUser.status === 'approved' && (<div><label style={{fontSize:'12px', color:'#666'}}>{t.submitTask}</label><input className="input-box" placeholder="TikTok 視頻連結" /><button style={{width:'100%', background:'#fff', color:'#000', border:'none', padding:'12px', borderRadius:'10px', fontWeight:'bold'}} onClick={()=>alert("視頻提交成功")}>{t.submitBtn}</button></div>)}</div>
                             <button onClick={()=>setView("creator")} style={{background:'none', border:'1px solid #333', color:'#666', width:'100%', padding:'10px', borderRadius:'12px', cursor:'pointer'}}>返回首頁</button>
                         </div>
                     ) : (
-                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div><div style={styles.card}><p>更換客服二維碼:</p><input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.inputBox} /><img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} /></div><div style={styles.card}><p>創客審核列表 (實時更新):</p>{pendingUsers.map(u => (
+                        <div style={{padding:'20px 5%', maxWidth:'800px', margin:'0 auto'}}><div style={{display:'flex', justifyContent:'space-between', alignItems:'center'}}><h2>指揮部</h2><button onClick={()=>setView("creator")} style={{padding:'10px', borderRadius:'8px', cursor:'pointer'}}>退出</button></div><div style={styles.card}><p>更換客服二維碼:</p><input value={qrCodeUrl} onChange={e=>setQrCodeUrl(e.target.value)} style={styles.inputBox} /><img src={qrCodeUrl} style={{width:'80px', marginTop:'10px', borderRadius:'10px'}} /></div><div style={styles.card}><p>待審核列表 (實時更新):</p>{pendingUsers.length === 0 ? <p style={{color:'#444'}}>暫無申請</p> : pendingUsers.map(u => (
                             <div key={u.id} style={{padding:'15px', background:'#000', borderBottom:'1px solid #222', borderRadius:'10px', marginBottom:'10px'}}>
-                                <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.name || "新用戶"} | {u.phone || "無號碼"}</div>
+                                <div style={{fontSize:'14px', fontWeight:'bold', color:'#00f2ea'}}>{u.name} | {u.phone}</div>
                                 <div style={{fontSize:'12px', color:'#888'}}>{u.info}</div>
                                 <a href={u.tiktok} target="_blank" style={{fontSize:'12px', color:'#fff', textDecoration:'underline'}}>{u.tiktok}</a><br/>
                                 <div style={{textAlign:'right', marginTop:'10px'}}>
-                                    <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>{setCurrentUser(prev=>({...prev, status:'approved'})); alert("已核准");}}>核准通過</button>
+                                    <button style={{background:'#00f2ea', border:'none', padding:'6px 15px', borderRadius:'6px', fontWeight:'bold', cursor:'pointer'}} onClick={()=>{setCurrentUser(prev=>({...prev, status:'approved'})); alert("用戶審核已通過");}}>核准通過</button>
                                 </div>
                             </div>
                         ))}</div></div>
@@ -193,8 +196,8 @@
                         <form onSubmit={handleAuth} style={{width:'100%'}}>
                             {modalType === 'register' && (
                                 <>
-                                    <input required className="input-box" placeholder="姓名" value={regForm.name} onChange={e=>setRegForm({...regForm, name:e.target.value})} />
-                                    <input required className="input-box" placeholder="電話號碼" value={regForm.phone} onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
+                                    <input required className="input-box" placeholder="姓名" onChange={e=>setRegForm({...regForm, name:e.target.value})} />
+                                    <input required className="input-box" placeholder="電話號碼" onChange={e=>setRegForm({...regForm, phone:e.target.value})} />
                                 </>
                             )}
                             <input required className="input-box" value={modalType==='register'?regForm.email:inputVal} onChange={e=>modalType==='register'?setRegForm({...regForm, email:e.target.value}):setInputVal(e.target.value)} placeholder={modalType==='adminLogin'?"管理帳號":"Email"} />
